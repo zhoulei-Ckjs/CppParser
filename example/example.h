@@ -8,6 +8,7 @@ void foo();
 
 /**
  * @brief This function adds two numbers
+ * @module hahahha
  * @param a
  * @param b
  * @return
@@ -22,6 +23,7 @@ class example
 public :
     /**
      * @brief function in class
+     * @module example::func
      */
     void func();
 };

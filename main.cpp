@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <regex>
 
 #include <clang/AST/AST.h>
 #include <clang/AST/ASTContext.h>
@@ -13,6 +14,18 @@
 
 using namespace clang;
 using namespace clang::tooling;
+
+// Helper function to extract @module content
+std::string extractModuleContent(const std::string &commentText)
+{
+    std::regex moduleRegex(R"(@module\s+(\S+))"); ///< 这是一个原始字符串字面量，表示正则表达式的内容。原始字符串字面量以 R"( 开始，并以 )" 结束，中间的内容不会对转义字符进行处理。
+    std::smatch match;
+    if (std::regex_search(commentText, match, moduleRegex))
+    {
+        return match[1].str();
+    }
+    return "";
+}
 
 class ClassVisitor : public RecursiveASTVisitor<ClassVisitor>
 {
@@ -39,7 +52,12 @@ public:
                 std::cout << " is fully defined" << std::endl;
                 if (const RawComment *Comment = Context->getRawCommentForDeclNoCache(Declaration))
                 {
-                    std::cout << "Comment: \n" << Comment->getRawText(Context->getSourceManager()).str();
+                    std::string commentText = Comment->getRawText(Context->getSourceManager()).str();
+                    std::cout << "Comment: \n" << commentText;
+
+                    // Extract @module content
+                    std::string moduleContent = extractModuleContent(commentText);
+                    std::cout << "\n@module: " << moduleContent << std::endl;
                 }
                 std::cout << std::endl;
             }
@@ -48,7 +66,12 @@ public:
                 std::cout << " is not fully defined" << std::endl;
                 if (const RawComment *Comment = Context->getRawCommentForDeclNoCache(Declaration))
                 {
-                    std::cout << "Comment: \n" << Comment->getRawText(Context->getSourceManager()).str();
+                    std::string commentText = Comment->getRawText(Context->getSourceManager()).str();
+                    std::cout << "Comment: \n" << commentText;
+
+                    // Extract @module content
+                    std::string moduleContent = extractModuleContent(commentText);
+                    std::cout << "\n@module: " << moduleContent << std::endl;
                 }
                 std::cout << std::endl;
             }
@@ -85,7 +108,12 @@ public:
                 std::cout << " has body" << std::endl;
                 if (const RawComment *Comment = Context->getRawCommentForDeclNoCache(Declaration))
                 {
-                    std::cout << "Comment: \n" << Comment->getRawText(Context->getSourceManager()).str();
+                    std::string commentText = Comment->getRawText(Context->getSourceManager()).str();
+                    std::cout << "Comment: \n" << commentText;
+
+                    // Extract @module content
+                    std::string moduleContent = extractModuleContent(commentText);
+                    std::cout << "\n@module: " << moduleContent << std::endl;
                 }
                 std::cout << std::endl;
             }
@@ -94,7 +122,12 @@ public:
                 std::cout << " has no body" << std::endl;
                 if (const RawComment *Comment = Context->getRawCommentForDeclNoCache(Declaration))
                 {
-                    std::cout << "Comment: \n" << Comment->getRawText(Context->getSourceManager()).str();
+                    std::string commentText = Comment->getRawText(Context->getSourceManager()).str();
+                    std::cout << "Comment: \n" << commentText;
+
+                    // Extract @module content
+                    std::string moduleContent = extractModuleContent(commentText);
+                    std::cout << "\n@module: " << moduleContent << std::endl;
                 }
                 std::cout << std::endl;
             }
