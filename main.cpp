@@ -14,10 +14,57 @@
 using namespace clang;
 using namespace clang::tooling;
 
+class ClassVisitor : public RecursiveASTVisitor<ClassVisitor>
+{
+public:
+    explicit ClassVisitor(ASTContext *Context) : Context(Context)
+    {}
+
+    bool VisitCXXRecordDecl(CXXRecordDecl *Declaration)
+    {
+        FullSourceLoc FullLocation = Context->getFullLoc(Declaration->getBeginLoc());
+        if (FullLocation.isValid())
+        {
+            const SourceManager &SM = Context->getSourceManager();
+            StringRef FilePath = SM.getFilename(FullLocation);
+            if (FilePath.find("/home/zl/CLionProjects/CppParser") == std::string::npos)
+            {
+                return true;
+            }
+
+            std::cout << "Class: " << Declaration->getNameAsString();
+
+            if (Declaration->isCompleteDefinition())
+            {
+                std::cout << " is fully defined" << std::endl;
+                if (const RawComment *Comment = Context->getRawCommentForDeclNoCache(Declaration))
+                {
+                    std::cout << "Comment: \n" << Comment->getRawText(Context->getSourceManager()).str();
+                }
+                std::cout << std::endl;
+            }
+            else
+            {
+                std::cout << " is not fully defined" << std::endl;
+                if (const RawComment *Comment = Context->getRawCommentForDeclNoCache(Declaration))
+                {
+                    std::cout << "Comment: \n" << Comment->getRawText(Context->getSourceManager()).str();
+                }
+                std::cout << std::endl;
+            }
+        }
+        return true;
+    }
+
+private:
+    ASTContext *Context;
+};
+
 class FunctionVisitor : public RecursiveASTVisitor<FunctionVisitor>
 {
 public:
-    explicit FunctionVisitor(ASTContext *Context) : Context(Context) {}
+    explicit FunctionVisitor(ASTContext *Context) : Context(Context)
+    {}
 
     bool VisitFunctionDecl(FunctionDecl *Declaration)
     {
@@ -26,7 +73,7 @@ public:
         {
             const SourceManager &SM = Context->getSourceManager();
             StringRef FilePath = SM.getFilename(FullLocation);
-            if (FilePath.find("/home/zl/CLionProjects/main") == std::string::npos)
+            if (FilePath.find("/home/zl/CLionProjects/CppParser") == std::string::npos)
             {
                 return true;
             }
@@ -59,19 +106,41 @@ private:
     ASTContext *Context;
 };
 
+class Visitor : public RecursiveASTVisitor<Visitor>
+{
+public:
+    explicit Visitor(ASTContext *Context) : _function_visitor(Context), _class_visitor(Context)
+    {}
+
+    bool VisitFunctionDecl(FunctionDecl *Declaration)
+    {
+        return _function_visitor.VisitFunctionDecl(Declaration);
+    }
+
+    bool VisitCXXRecordDecl(CXXRecordDecl *Declaration)
+    {
+        return _class_visitor.VisitCXXRecordDecl(Declaration);
+    }
+
+private:
+    FunctionVisitor _function_visitor;
+    ClassVisitor _class_visitor;
+};
+
 // consume AST
 class FunctionASTConsumer : public ASTConsumer
 {
 public:
-    explicit FunctionASTConsumer(ASTContext *Context) : Visitor(Context) {}
+    explicit FunctionASTConsumer(ASTContext *Context) : _visitor(Context)
+    {}
 
     virtual void HandleTranslationUnit(ASTContext &Context)
     {
-        Visitor.TraverseDecl(Context.getTranslationUnitDecl());
+        _visitor.TraverseDecl(Context.getTranslationUnitDecl());
     }
 
 private:
-    FunctionVisitor Visitor;
+    Visitor _visitor;
 };
 
 class FunctionFrontendAction : public ASTFrontendAction

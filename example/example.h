@@ -14,4 +14,16 @@ void foo();
  */
 int add(int a, int b);
 
+/**
+ * @brief example class
+ */
+class example
+{
+public :
+    /**
+     * @brief function in class
+     */
+    void func();
+};
+
 #endif
