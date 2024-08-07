@@ -2,29 +2,15 @@
 #define FUNCTIONPARSER_EXAMPLE_H
 
 /**
- * @brief This is a simple function
- */
-void foo();
-
-/**
- * @brief This function adds two numbers
- * @module hahahha
- * @param a
- * @param b
- * @return
- */
-int add(int a, int b);
-
-/**
  * @brief example class
+ * @system 态势分发服务
+ * @module 中间件模块
+ * @name 中间件类
  */
 class example
 {
 public :
-    /**
-     * @brief function in class
-     * @module example::func
-     */
+    /// 哈哈哈
     void func();
 };
 

@@ -2,3 +2,4 @@ cmake-build-debug
 example/build
 .idea
 build
+cmake-build-release/

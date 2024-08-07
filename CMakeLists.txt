@@ -13,12 +13,17 @@ message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -frtti -fexceptions")
 
-include_directories(${LLVM_INCLUDE_DIRS})
+include_directories(
+        ${LLVM_INCLUDE_DIRS}
+        ${CMAKE_CURRENT_LIST_DIR}/include
+)
 link_directories(${LLVM_LIBRARY_DIRS})
 add_definitions(${LLVM_DEFINITIONS})
 
 set(CMAKE_EXE_LINKER_FLAGS "-static")
-add_executable(FunctionParser main.cpp)
+
+aux_source_directory(${CMAKE_CURRENT_LIST_DIR}/src SRC)
+add_executable(FunctionParser main.cpp ${SRC})
 # 链接 Clang 和 LLVM 库
 target_link_libraries(FunctionParser
         clangTooling

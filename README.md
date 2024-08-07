@@ -14,3 +14,11 @@ cmake -S llvm -B build -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra" -DCMAKE_
 cmake --build build
 cmake --install build
 ```
+
+# 此项目编译运行
+```angular2html
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build
+cd build
+./FunctionParser ../example/example.h
+```

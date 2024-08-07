@@ -1,7 +1,6 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include <regex>
 
 #include <clang/AST/AST.h>
 #include <clang/AST/ASTContext.h>
@@ -12,20 +11,12 @@
 #include <clang/Tooling/CommonOptionsParser.h>
 #include <clang/Tooling/Tooling.h>
 
+#include "ExtractTools.h"
+
 using namespace clang;
 using namespace clang::tooling;
 
-// Helper function to extract @module content
-std::string extractModuleContent(const std::string &commentText)
-{
-    std::regex moduleRegex(R"(@module\s+(\S+))"); ///< 这是一个原始字符串字面量，表示正则表达式的内容。原始字符串字面量以 R"( 开始，并以 )" 结束，中间的内容不会对转义字符进行处理。
-    std::smatch match;
-    if (std::regex_search(commentText, match, moduleRegex))
-    {
-        return match[1].str();
-    }
-    return "";
-}
+const char * file_papth = "/home/zl/CppParser";    ///< 只解析这个路径下的文件
 
 class ClassVisitor : public RecursiveASTVisitor<ClassVisitor>
 {
@@ -40,41 +31,32 @@ public:
         {
             const SourceManager &SM = Context->getSourceManager();
             StringRef FilePath = SM.getFilename(FullLocation);
-            if (FilePath.find("/home/zl/CLionProjects/CppParser") == std::string::npos)
-            {
+            if (FilePath.find(file_papth) == std::string::npos)
                 return true;
-            }
 
-            std::cout << "Class: " << Declaration->getNameAsString();
+            std::cout << "类: " << Declaration->getNameAsString();
 
             if (Declaration->isCompleteDefinition())
-            {
-                std::cout << " is fully defined" << std::endl;
-                if (const RawComment *Comment = Context->getRawCommentForDeclNoCache(Declaration))
-                {
-                    std::string commentText = Comment->getRawText(Context->getSourceManager()).str();
-                    std::cout << "Comment: \n" << commentText;
+                std::cout << " 具有完整定义" << std::endl;
+            else
+                std::cout << " 不完全定义" << std::endl;
 
-                    // Extract @module content
-                    std::string moduleContent = extractModuleContent(commentText);
-                    std::cout << "\n@module: " << moduleContent << std::endl;
-                }
-                std::cout << std::endl;
+            if (const RawComment *Comment = Context->getRawCommentForDeclNoCache(Declaration))
+            {
+                std::string commentText = Comment->getRawText(Context->getSourceManager()).str();
+
+                /// 抽取 @system 注释的内容
+                std::string system_content = ExtractTools::ExtractSystemContent(commentText);
+                std::cout << "\t@system: " << system_content << std::endl;
+                /// 抽取 @module 注释内容
+                std::string moduleContent = ExtractTools::ExtractModuleContent(commentText);
+                std::cout << "\t@module: " << moduleContent << std::endl;
             }
             else
             {
-                std::cout << " is not fully defined" << std::endl;
-                if (const RawComment *Comment = Context->getRawCommentForDeclNoCache(Declaration))
-                {
-                    std::string commentText = Comment->getRawText(Context->getSourceManager()).str();
-                    std::cout << "Comment: \n" << commentText;
-
-                    // Extract @module content
-                    std::string moduleContent = extractModuleContent(commentText);
-                    std::cout << "\n@module: " << moduleContent << std::endl;
-                }
-                std::cout << std::endl;
+                std::cout << "没有注释" << std::endl;
             }
+            std::cout << std::endl;
         }
         return true;
     }
@@ -96,41 +78,26 @@ public:
         {
             const SourceManager &SM = Context->getSourceManager();
             StringRef FilePath = SM.getFilename(FullLocation);
-            if (FilePath.find("/home/zl/CLionProjects/CppParser") == std::string::npos)
-            {
+            if (FilePath.find(file_papth) == std::string::npos)
                 return true;
-            }
 
-            std::cout << "Function: " << Declaration->getNameInfo().getName().getAsString();
+            std::cout << "函数: " << Declaration->getNameInfo().getName().getAsString();
 
             if (Declaration->hasBody())
-            {
-                std::cout << " has body" << std::endl;
-                if (const RawComment *Comment = Context->getRawCommentForDeclNoCache(Declaration))
-                {
-                    std::string commentText = Comment->getRawText(Context->getSourceManager()).str();
-                    std::cout << "Comment: \n" << commentText;
+                std::cout << " 有定义" << std::endl;
+            else
+                std::cout << " 没有完整定义" << std::endl;
 
-                    // Extract @module content
-                    std::string moduleContent = extractModuleContent(commentText);
-                    std::cout << "\n@module: " << moduleContent << std::endl;
-                }
-                std::cout << std::endl;
+            if (const RawComment *Comment = Context->getRawCommentForDeclNoCache(Declaration))
+            {
+                std::string commentText = Comment->getRawText(Context->getSourceManager()).str();
+                std::cout << "\t" << commentText << std::endl;
             }
             else
             {
-                std::cout << " has no body" << std::endl;
-                if (const RawComment *Comment = Context->getRawCommentForDeclNoCache(Declaration))
-                {
-                    std::string commentText = Comment->getRawText(Context->getSourceManager()).str();
-                    std::cout << "Comment: \n" << commentText;
-
-                    // Extract @module content
-                    std::string moduleContent = extractModuleContent(commentText);
-                    std::cout << "\n@module: " << moduleContent << std::endl;
-                }
-                std::cout << std::endl;
+                std::cout << "\t没有注释" << std::endl;
             }
+            std::cout << std::endl;
         }
         return true;
     }
@@ -189,7 +156,7 @@ static llvm::cl::OptionCategory ToolingSampleCategory("tooling-sample");
 
 int main(int argc, const char **argv)
 {
-    //创建一个 CommonOptionsParser 实例，用于解析命令行选项。
+    /// 创建一个 CommonOptionsParser 实例，用于解析命令行选项。
     auto ExpectedParser = CommonOptionsParser::create(argc, argv, ToolingSampleCategory);
     if (!ExpectedParser)
     {
@@ -198,9 +165,9 @@ int main(int argc, const char **argv)
     }
     CommonOptionsParser &OptionsParser = *ExpectedParser;
 
-    //使用 CommonOptionsParser 创建一个 ClangTool 实例。
+    /// 使用 CommonOptionsParser 创建一个 ClangTool 实例。
     ClangTool Tool(OptionsParser.getCompilations(), OptionsParser.getSourcePathList());
 
-    //运行 ClangTool，并使用 FunctionFrontendAction 处理输入文件。
+    /// 运行 ClangTool，并使用 FunctionFrontendAction 处理输入文件。
     return Tool.run(newFrontendActionFactory<FunctionFrontendAction>().get());
 }
