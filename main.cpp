@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <filesystem>
 
 #include <clang/AST/AST.h>
 #include <clang/AST/ASTContext.h>
@@ -165,8 +166,26 @@ int main(int argc, const char **argv)
     }
     CommonOptionsParser &OptionsParser = *ExpectedParser;
 
+    std::vector<std::string> allFiles = OptionsParser.getSourcePathList();
+
+    if(allFiles.size() == 1 && std::filesystem::is_directory(allFiles[0]))
+    {
+        std::string directory_path = allFiles[0];
+        allFiles.clear();
+
+        for(const auto& entry : std::filesystem::recursive_directory_iterator(directory_path))
+        {
+            if(entry.is_regular_file() && entry.path().extension() == ".h")
+            {
+                allFiles.push_back(entry.path().string());
+                std::cout << "添加文件：" << entry.path().string() << std::endl;
+            }
+        }
+        std::cout << std::endl;
+    }
+
     /// 使用 CommonOptionsParser 创建一个 ClangTool 实例。
-    ClangTool Tool(OptionsParser.getCompilations(), OptionsParser.getSourcePathList());
+    ClangTool Tool(OptionsParser.getCompilations(), allFiles);
 
     /// 运行 ClangTool，并使用 FunctionFrontendAction 处理输入文件。
     return Tool.run(newFrontendActionFactory<FunctionFrontendAction>().get());

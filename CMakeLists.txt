@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.10)
 project(FunctionParser)
 
+set(JSON_BuildTests OFF CACHE INTERNAL "")
+add_subdirectory(third_party/json)
+
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
 
@@ -49,6 +52,7 @@ target_link_libraries(FunctionParser
         LLVMOption
         LLVMMC
         LLVMMCParser
+        nlohmann_json::nlohmann_json
 )
 
 if(LLVM_ENABLE_RTTI)
