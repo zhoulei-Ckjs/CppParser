@@ -24,15 +24,46 @@ const char * file_papth = "/home/zl/CppParser";    ///< 只解析这个路径下
 class ClassVisitor : public RecursiveASTVisitor<ClassVisitor>
 {
 public:
-    explicit ClassVisitor(ASTContext *Context) : Context(Context)
+    explicit ClassVisitor(ASTContext *Context) : _context(Context)
     {}
+
+    bool VisitFunctionDecl(FunctionDecl *Declaration)
+    {
+        FullSourceLoc FullLocation = _context->getFullLoc(Declaration->getBeginLoc());
+        if (FullLocation.isValid())
+        {
+            const SourceManager &SM = _context->getSourceManager();
+            StringRef FilePath = SM.getFilename(FullLocation);
+            if (FilePath.find(file_papth) == std::string::npos)
+                return true;
+
+            std::cout << "函数: " << Declaration->getNameInfo().getName().getAsString();
+
+            if (Declaration->hasBody())
+                std::cout << " 有定义" << std::endl;
+            else
+                std::cout << " 没有完整定义" << std::endl;
+
+            if (const RawComment *Comment = _context->getRawCommentForDeclNoCache(Declaration))
+            {
+                std::string commentText = Comment->getRawText(_context->getSourceManager()).str();
+                std::cout << "\t" << commentText << std::endl;
+            }
+            else
+            {
+                std::cout << "\t没有注释" << std::endl;
+            }
+            std::cout << std::endl;
+        }
+        return true;
+    }
 
     bool VisitCXXRecordDecl(CXXRecordDecl *Declaration)
     {
-        FullSourceLoc FullLocation = Context->getFullLoc(Declaration->getBeginLoc());
+        FullSourceLoc FullLocation = _context->getFullLoc(Declaration->getBeginLoc());
         if (FullLocation.isValid())
         {
-            const SourceManager &SM = Context->getSourceManager();
+            const SourceManager &SM = _context->getSourceManager();
             StringRef FilePath = SM.getFilename(FullLocation);
             if (FilePath.find(file_papth) == std::string::npos)
                 return true;
@@ -44,9 +75,9 @@ public:
             else
                 std::cout << " 不完全定义" << std::endl;
 
-            if (const RawComment *Comment = Context->getRawCommentForDeclNoCache(Declaration))
+            if (const RawComment *Comment = _context->getRawCommentForDeclNoCache(Declaration))
             {
-                std::string commentText = Comment->getRawText(Context->getSourceManager()).str();
+                std::string commentText = Comment->getRawText(_context->getSourceManager()).str();
 
                 /// 抽取 @system 注释的内容
                 std::string system_content = ExtractTools::ExtractSystemContent(commentText);
@@ -64,63 +95,12 @@ public:
         return true;
     }
 
-    bool VisitFunctionDecl(FunctionDecl *Declaration)
-    {
-        FullSourceLoc FullLocation = Context->getFullLoc(Declaration->getBeginLoc());
-        if (FullLocation.isValid())
-        {
-            const SourceManager &SM = Context->getSourceManager();
-            StringRef FilePath = SM.getFilename(FullLocation);
-            if (FilePath.find(file_papth) == std::string::npos)
-                return true;
-
-            std::cout << "函数: " << Declaration->getNameInfo().getName().getAsString();
-
-            if (Declaration->hasBody())
-                std::cout << " 有定义" << std::endl;
-            else
-                std::cout << " 没有完整定义" << std::endl;
-
-            if (const RawComment *Comment = Context->getRawCommentForDeclNoCache(Declaration))
-            {
-                std::string commentText = Comment->getRawText(Context->getSourceManager()).str();
-                std::cout << "\t" << commentText << std::endl;
-            }
-            else
-            {
-                std::cout << "\t没有注释" << std::endl;
-            }
-            std::cout << std::endl;
-        }
-        return true;
-    }
-
-private:
-    ASTContext *Context;
-};
-
-class Visitor : public RecursiveASTVisitor<Visitor>
-{
-public:
-    explicit Visitor(ASTContext *Context) : _class_visitor(Context)
-    {}
-
-    bool VisitFunctionDecl(FunctionDecl *Declaration)
-    {
-        return _class_visitor.VisitFunctionDecl(Declaration);
-    }
-
-    bool VisitCXXRecordDecl(CXXRecordDecl *Declaration)
-    {
-        return _class_visitor.VisitCXXRecordDecl(Declaration);
-    }
-
 private:
     /// 类访问
-    ClassVisitor _class_visitor;
+    ASTContext* _context;
 };
 
-// consume AST
+/// 消费 AST
 class FunctionASTConsumer : public ASTConsumer
 {
 public:
@@ -133,7 +113,7 @@ public:
     }
 
 private:
-    Visitor _visitor;
+    ClassVisitor _visitor;
 };
 
 class FunctionFrontendAction : public ASTFrontendAction
