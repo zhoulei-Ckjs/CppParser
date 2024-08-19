@@ -141,6 +141,8 @@ class FunctionFrontendAction : public ASTFrontendAction
 public:
     virtual std::unique_ptr<ASTConsumer> CreateASTConsumer(CompilerInstance &CI, StringRef file)
     {
+        /// 抑制所有诊断信息
+        CI.getDiagnostics().setSuppressAllDiagnostics(true);
         return std::make_unique<FunctionASTConsumer>(&CI.getASTContext());
     }
 };
