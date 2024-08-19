@@ -14,12 +14,19 @@
 #include <nlohmann/json.hpp>
 
 #include "ExtractTools.h"
+#include "CppParser.h"
 
 using namespace clang;
 using namespace clang::tooling;
 using json = nlohmann::json;
 
-const char * file_papth = "/home/zl/CppParser";    ///< 只解析这个路径下的文件
+const char * file_papth = "/home/zl/CppParser";                 ///< 只解析这个路径下的文件
+/**
+ * @brief 系统列表
+ * @tparam std::string 系统名
+ * @tparam CPPPARSER::system 系统
+ */
+static std::map<std::string, CPPPARSER::system> systemList;
 
 class ClassVisitor : public RecursiveASTVisitor<ClassVisitor>
 {
@@ -81,7 +88,12 @@ public:
 
                 /// 抽取 @system 注释的内容
                 std::string system_content = ExtractTools::ExtractSystemContent(commentText);
-                std::cout << "\t@system: " << system_content << std::endl;
+                if(systemList.find(system_content) == systemList.end())
+                {
+                    std::cout << "--增加系统：" << system_content << std::endl;
+                    systemList.insert(std::make_pair(system_content, CPPPARSER::system(system_content)));
+                }
+
                 /// 抽取 @module 注释内容
                 std::string moduleContent = ExtractTools::ExtractModuleContent(commentText);
                 std::cout << "\t@module: " << moduleContent << std::endl;
