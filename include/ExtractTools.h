@@ -7,6 +7,12 @@ class ExtractTools
 {
 public :
     /**
+     * @brief 抽取子模块
+     * @param commentText
+     * @return @sub_module的内容
+     */
+    static std::string ExtractSubModuleContent(const std::string& commentText);
+    /**
      * @brief 抽取@module的内容
      * @param commentText 传入参数，注释
      * @return @module部分的内容

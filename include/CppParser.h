@@ -91,16 +91,6 @@ namespace CPPPARSER
     };
 
     /**
-     * @brief 子模块类
-     */
-    class subModuleList
-    {
-    public :
-        std::string name;           ///< @subModule指定的名字
-        std::vector<classList> class_list;  ///< 类
-    };
-
-    /**
      * @brief 模块类
      */
     class module
@@ -109,9 +99,9 @@ namespace CPPPARSER
         explicit module(std::string name);
 
     public :
-        std::vector<subModuleList> sub_module_list; ///< 子模块集合
-        std::string _name;                          ///< 模块名字@module
-        std::vector<classList> class_list;          ///< 类
+        std::map<std::string, module> _sub_module_list;           ///< 子模块集合
+        std::string _name;                                        ///< 模块名字@module
+        std::map<std::string, classList> _class_list;             ///< 类
     };
 
     /**
@@ -123,7 +113,7 @@ namespace CPPPARSER
         explicit system(std::string name);
 
     public:
-        std::map<std::string, module> module_list;        ///< 模块列表
+        std::map<std::string, module> _module_list;       ///< 模块列表
         std::string _name;                                ///< 系统或服务名
     };
 }
