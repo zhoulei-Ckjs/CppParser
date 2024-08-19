@@ -4,8 +4,6 @@
 #include <map>
 #include "include/Session/Client.h"
 
-class Client;
-
 /**
  * @brief 客户端管理类
  * @system 解析服务

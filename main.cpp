@@ -64,16 +64,6 @@ public:
         return true;
     }
 
-private:
-    ASTContext *Context;
-};
-
-class FunctionVisitor : public RecursiveASTVisitor<FunctionVisitor>
-{
-public:
-    explicit FunctionVisitor(ASTContext *Context) : Context(Context)
-    {}
-
     bool VisitFunctionDecl(FunctionDecl *Declaration)
     {
         FullSourceLoc FullLocation = Context->getFullLoc(Declaration->getBeginLoc());
@@ -112,12 +102,12 @@ private:
 class Visitor : public RecursiveASTVisitor<Visitor>
 {
 public:
-    explicit Visitor(ASTContext *Context) : _function_visitor(Context), _class_visitor(Context)
+    explicit Visitor(ASTContext *Context) : _class_visitor(Context)
     {}
 
     bool VisitFunctionDecl(FunctionDecl *Declaration)
     {
-        return _function_visitor.VisitFunctionDecl(Declaration);
+        return _class_visitor.VisitFunctionDecl(Declaration);
     }
 
     bool VisitCXXRecordDecl(CXXRecordDecl *Declaration)
@@ -126,8 +116,6 @@ public:
     }
 
 private:
-    /// 函数访问
-    FunctionVisitor _function_visitor;
     /// 类访问
     ClassVisitor _class_visitor;
 };

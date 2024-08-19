@@ -114,7 +114,7 @@ namespace CPPPARSER
     /**
      * @brief 系统类
      */
-    class systemList
+    class system
     {
     public :
         std::vector<moduleList> module_list;    ///< 模块列表
