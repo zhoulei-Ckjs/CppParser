@@ -15,6 +15,7 @@ public :
      * @brief 发送数据包到客户端
      * @param buf 数据包
      * @param size 数据包长度
+     * @name 发送数据
      */
     void Send(char* buf, int size);
 private :
