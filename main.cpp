@@ -181,6 +181,15 @@ public:
                                 current_return
                                 );
                     }
+
+                    /// 9.提取参数 map
+                    current_func->second._param_comment_map = ExtractTools::ExtractParamsContent(current_func_comment);
+                    for(auto& iter : current_func->second._param_comment_map)
+                    {
+                        std::cout << "------------增加参数类型: " << std::endl;
+                        std::cout << "-------------- " << iter.first << " : " << iter.second << std::endl;
+                    }
+//                    current_func->second._param_comment_map
                 }
             }
             else

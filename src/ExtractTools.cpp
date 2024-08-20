@@ -2,6 +2,24 @@
 
 #include "ExtractTools.h"
 
+std::map<std::string, std::string> ExtractTools::ExtractParamsContent(const std::string& commentText)
+{
+    /// 正则表达式用于匹配 @param 后跟参数名和描述
+    std::regex param_regex(R"(@param\s+(\S+)\s+(.+))");
+    std::sregex_iterator it(commentText.begin(), commentText.end(), param_regex);
+    std::sregex_iterator end;
+
+    std::map<std::string, std::string> param_map;
+    for (; it != end; ++it)
+    {
+        /// (*it)[1] 是参数名
+        /// (*it)[2] 是参数描述
+        param_map[(*it)[1].str()] = (*it)[2].str();
+    }
+    return param_map;
+}
+
+
 std::string ExtractTools::ExtractReturnContent(const std::string& commentText)
 {
     std::regex return_regex(R"(@return\s+(\S+))");
