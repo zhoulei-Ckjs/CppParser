@@ -121,10 +121,25 @@ public:
                         current_module = it.first;
                     }
                 }
+
+                /// 抽取 @name 注释内容
+                std::string class_name_content = ExtractTools::ExtractClassContent(commentText);
+                /// 抽取 @brief 的内容
+                std::string class_brief_content = ExtractTools::ExtractBriefContent(commentText);
+                /// 找到类
+                auto current_class = current_module->second._class_list.find(Declaration->getNameAsString());
+                if(current_class == current_module->second._class_list.end())
+                {
+                    std::cout << "--------增加类：" << Declaration->getNameAsString() << std::endl;
+                    current_module->second._class_list.insert(std::make_pair(Declaration->getNameAsString(), CPPPARSER::class_(
+                            moduleContent + sub_module_content, Declaration->getNameAsString(),
+                            system_content, moduleContent, sub_module_content, class_name_content,
+                            class_brief_content)));
+                }
             }
             else
             {
-                std::cout << "没有注释" << std::endl;
+                std::cout << "[WARNING]" << Declaration->getNameAsString() << "没有注释" << std::endl;
             }
             std::cout << std::endl;
         }
