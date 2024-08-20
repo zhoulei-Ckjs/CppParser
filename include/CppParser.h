@@ -13,12 +13,17 @@ namespace CPPPARSER
     class returnType
     {
     public :
-        std::string className;      ///< 类名
-        std::string methodName;     ///< 方法名
-        std::string paramType;      ///< 返回类型
-        std::string name;           ///< @return指定的中文名
-        std::string description;    ///< @return指定的中文名
-        bool ignore;                ///< 是否忽略
+        returnType();
+        explicit returnType(std::string class_name, std::string method_name, std::string param_type,
+                            std::string name, std::string description, bool ignore = false);
+        returnType& operator=(const returnType&) = default;
+    public :
+        std::string _class_name;    ///< 类名
+        std::string _method_name;   ///< 方法名
+        std::string _param_type;    ///< 返回类型
+        std::string _name;          ///< @return指定的中文名
+        std::string _description;   ///< @return指定的中文名
+        bool _ignore;               ///< 是否忽略
     };
 
     /**
