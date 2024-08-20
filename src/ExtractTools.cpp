@@ -23,7 +23,7 @@ std::string ExtractTools::ExtractBriefContent(const std::string& commentText)
  * @param commentText 注释
  * @return 类注释中 @name 指定的内容
  */
-std::string ExtractTools::ExtractClassContent(const std::string& commentText)
+std::string ExtractTools::ExtractNameContent(const std::string& commentText)
 {
     std::regex class_regex(R"(@name\s+(\S+))");
     std::smatch match;
