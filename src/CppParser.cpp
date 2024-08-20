@@ -3,6 +3,20 @@
 
 namespace CPPPARSER
 {
+    _param::_param(std::string class_name, std::string method_name, std::string param_type,
+                   std::string param_name, std::string name, std::string description, bool ignore)
+                   : _class_name(class_name), _method_name(method_name), _param_type(param_type),
+                   _param_name(param_name), _name(name), _description(description), _ignore(ignore)
+    {
+        std::cout << "--------------类名: " << class_name << std::endl;
+        std::cout << "--------------方法名: " << method_name << std::endl;
+        std::cout << "--------------参数类型: " << param_type << std::endl;
+        std::cout << "--------------参数名: " << param_name << std::endl;
+        std::cout << "--------------参数中文名: " << name << std::endl;
+        std::cout << "--------------参数描述: " << description << std::endl;
+        std::cout << "--------------是否忽略: " << ignore << std::endl;
+    }
+
     _method::_method(std::string class_name, clang::AccessSpecifier visibility, std::string method_name,
         std::string return_type_comment, std::string name, std::string description, bool ignore)
         : _class_name(class_name), _method_name(method_name), _return_type_comment(return_type_comment),

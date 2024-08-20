@@ -34,37 +34,6 @@ public:
     explicit ClassVisitor(ASTContext *Context) : _context(Context)
     {}
 
-//    bool VisitFunctionDecl(FunctionDecl *Declaration)
-//    {
-//        FullSourceLoc FullLocation = _context->getFullLoc(Declaration->getBeginLoc());
-//        if (FullLocation.isValid())
-//        {
-//            const SourceManager &SM = _context->getSourceManager();
-//            StringRef FilePath = SM.getFilename(FullLocation);
-//            if (FilePath.find(file_papth) == std::string::npos)
-//                return true;
-//
-//            std::cout << "函数: " << Declaration->getNameInfo().getName().getAsString();
-//
-//            if (Declaration->hasBody())
-//                std::cout << " 有定义" << std::endl;
-//            else
-//                std::cout << " 没有完整定义" << std::endl;
-//
-//            if (const RawComment *Comment = _context->getRawCommentForDeclNoCache(Declaration))
-//            {
-//                std::string commentText = Comment->getRawText(_context->getSourceManager()).str();
-//                std::cout << "\t" << commentText << std::endl;
-//            }
-//            else
-//            {
-//                std::cout << "\t没有注释" << std::endl;
-//            }
-//            std::cout << std::endl;
-//        }
-//        return true;
-//    }
-
     bool VisitCXXRecordDecl(CXXRecordDecl *Declaration)
     {
         FullSourceLoc FullLocation = _context->getFullLoc(Declaration->getBeginLoc());
@@ -86,7 +55,7 @@ public:
             {
                 std::string commentText = Comment->getRawText(_context->getSourceManager()).str();
 
-                /// 抽取 @system 注释的内容
+                /// 1.抽取 @system 注释的内容
                 std::string system_content = ExtractTools::ExtractSystemContent(commentText);
                 /// 找到所属系统
                 auto current_system = systemList.find(system_content);
@@ -97,7 +66,7 @@ public:
                     current_system = it.first;
                 }
 
-                /// 抽取 @module 注释内容
+                /// 2.抽取 @module 注释内容
                 std::string moduleContent = ExtractTools::ExtractModuleContent(commentText);
                 /// 找到模块
                 auto current_module = current_system->second._module_list.find(moduleContent);
@@ -108,7 +77,7 @@ public:
                     current_module = it.first;
                 }
 
-                /// 抽取 @sub_module 注释内容
+                /// 3.抽取 @sub_module 注释内容
                 std::string sub_module_content = ExtractTools::ExtractSubModuleContent(commentText);
                 if(!sub_module_content.empty())
                 {
@@ -126,7 +95,7 @@ public:
                 std::string class_name_content = ExtractTools::ExtractNameContent(commentText);
                 /// 抽取 @brief 的内容
                 std::string class_brief_content = ExtractTools::ExtractBriefContent(commentText);
-                /// 找到类
+                /// 4.找到类
                 auto current_class = current_module->second._class_list.find(Declaration->getNameAsString());
                 if(current_class == current_module->second._class_list.end())
                 {
@@ -138,7 +107,7 @@ public:
                     current_class = it.first;
                 }
 
-                /// 找到所有成员变量
+                /// 5.找到所有成员变量
                 for (auto it = Declaration->field_begin(); it != Declaration->field_end(); ++it)
                 {
                     FieldDecl *field = *it;
@@ -163,7 +132,7 @@ public:
                     }
                 }
 
-                /// 获取类的所有方法
+                /// 6.获取类的所有方法
                 for (auto it = Declaration->method_begin(); it != Declaration->method_end(); ++it)
                 {
                     current_class->second._has_method = true;
@@ -184,10 +153,25 @@ public:
                     auto current_func = current_class->second._method_list.find(method->getNameAsString());
                     if(current_func == current_class->second._method_list.end())
                     {
-                        current_class->second._method_list.insert(std::make_pair(method->getNameAsString(),
+                        auto it_func = current_class->second._method_list.insert(std::make_pair(method->getNameAsString(),
                             CPPPARSER::_method(Declaration->getNameAsString(), method->getAccess(),
                                                method->getNameAsString(), current_return,
                                                current_func_name, current_func_brief)));
+                        auto current_method = it_func.first;
+
+                        /// 7.提取参数列表
+                        for (const ParmVarDecl *param : method->parameters())
+                        {
+                            std::cout << "------------增加参数: " << param->getNameAsString() << std::endl;
+                            current_method->second._param_list.insert(std::make_pair(
+                                    param->getNameAsString(),
+                                    CPPPARSER::_param(
+                                            Declaration->getNameAsString(), method->getNameAsString(),
+                                            param->getType().getAsString(), param->getNameAsString(),
+                                            "", ""
+                                            )
+                                    ));
+                        }
                     }
                 }
             }

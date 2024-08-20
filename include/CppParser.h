@@ -27,13 +27,16 @@ namespace CPPPARSER
     class _param
     {
     public:
-        std::string className;      ///< 类名
-        std::string methodName;     ///< 方法名
-        std::string paramType;      ///< 参数类型
-        std::string paramName;      ///< 参数的英文名
-        std::string name;           ///< 类型对应的名称
-        std::string description;    ///< 类型对应的描述
-        bool ignore;                ///< 是否可以忽略
+        explicit _param(std::string class_name, std::string method_name, std::string param_type,
+                        std::string param_name, std::string name, std::string description, bool ignore = false);
+    public:
+        std::string _class_name;    ///< 类名
+        std::string _method_name;   ///< 方法名
+        std::string _param_type;    ///< 参数类型
+        std::string _param_name;    ///< 参数的英文名
+        std::string _name;          ///< 类型对应的名称
+        std::string _description;   ///< 类型对应的描述
+        bool _ignore;               ///< 是否可以忽略
     };
 
     /**
