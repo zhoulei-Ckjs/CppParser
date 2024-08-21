@@ -151,7 +151,11 @@ namespace CPPPARSER
               _module(module), _sub_module(sub_module), _name(name), _description(description),
               _ignore(ignore)
     {
-
+        /// 张宏飞说这个不用，暂时置为false
+        isInterface = false;
+        isEnum = false;
+        isAnnotation = false;
+        _has_method = false;
     }
 
     json _class::ToJson()
