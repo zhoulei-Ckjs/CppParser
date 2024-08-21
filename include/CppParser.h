@@ -4,6 +4,9 @@
 #include <map>
 #include <vector>
 #include <clang/Basic/Specifiers.h>
+#include <nlohmann/json.hpp>
+
+using json = nlohmann::json;
 
 namespace CPPPARSER
 {
@@ -17,6 +20,7 @@ namespace CPPPARSER
         explicit returnType(std::string class_name, std::string method_name, std::string param_type,
                             std::string name, std::string description, bool ignore = false);
         returnType& operator=(const returnType&) = default;
+        json ToJson();
     public :
         std::string _class_name;    ///< 类名
         std::string _method_name;   ///< 方法名
@@ -34,6 +38,7 @@ namespace CPPPARSER
     public:
         explicit _param(std::string class_name, std::string method_name, std::string param_type,
                         std::string param_name, std::string name, std::string description, bool ignore = false);
+        json ToJson();
     public:
         std::string _class_name;    ///< 类名
         std::string _method_name;   ///< 方法名
@@ -53,6 +58,7 @@ namespace CPPPARSER
         explicit _method(std::string class_name, clang::AccessSpecifier visibility, std::string method_name,
                          std::string return_type_comment, std::string name, std::string description,
                          bool ignore = false);
+        json ToJson();
     public:
         std::string _class_name;     ///< 类名
         std::string _visibility;     ///< 可见性
@@ -75,6 +81,7 @@ namespace CPPPARSER
         explicit _field(std::string class_name, std::string field_type, std::string field_name,
                         clang::AccessSpecifier visibility, std::string name, std::string description,
                         bool ignore = false);
+        json ToJson();
     public :
         std::string _class_name;    ///< 类名
         std::string _field_type;    ///< 属性类型
@@ -94,6 +101,7 @@ namespace CPPPARSER
         explicit _class(std::string packageName, std::string class_name,
                std::string system, std::string module, std::string sub_module, std::string name,
                std::string description, bool ignore = false);
+        json ToJson();
 
     public :
         std::string _packageName;   ///< 中间件模块
@@ -122,6 +130,7 @@ namespace CPPPARSER
     {
     public :
         explicit module(std::string name);
+        json ToJson();
 
     public :
         std::map<std::string, module> _sub_module_list;           ///< 子模块集合
@@ -136,6 +145,7 @@ namespace CPPPARSER
     {
     public :
         explicit system(std::string name);
+        json ToJson();
 
     public:
         std::map<std::string, module> _module_list;       ///< 模块列表
