@@ -1,8 +1,0 @@
-[
-{
-  "directory": "/home/zl/CppParser/cmake-build-debug",
-  "command": "/usr/bin/g++ -frtti -fexceptions -g -std=gnu++17 -fdiagnostics-color=always   -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -o CMakeFiles/FunctionParser.dir/main.cpp.o -c /home/zl/CppParser/main.cpp",
-  "file": "/home/zl/CppParser/main.cpp",
-  "output": "CMakeFiles/FunctionParser.dir/main.cpp.o"
-}
-]

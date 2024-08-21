@@ -3,3 +3,5 @@ example/build
 .idea
 build
 cmake-build-release/
+output.json
+compile_commands.json
