@@ -117,8 +117,11 @@ namespace CPPPARSER
     class system
     {
     public :
+        explicit system(std::string name);
+
+    private:
         std::vector<moduleList> module_list;    ///< 模块列表
-        std::string name;                       ///< 系统或服务名
+        std::string _name;                      ///< 系统或服务名
     };
 }
 
