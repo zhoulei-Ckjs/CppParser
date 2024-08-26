@@ -307,6 +307,8 @@ int WriteCompileCommand(const char* argv)
 {
     auto my_path = std::filesystem::path(argv);
     std::cout << "输入文件夹路径为：" << absolute(my_path).string() << std::endl;
+    /// 更新文件夹路径
+    file_patch = absolute(my_path).string();
     if(!is_directory(my_path))
     {
         std::cout << argv << "不是文件夹，请提供文件夹!" << std::endl;
@@ -326,6 +328,7 @@ int WriteCompileCommand(const char* argv)
             {
                 #include"public_headers/public_headers.h"
             };
+    command += " -I" + absolute(my_path).string();
     for(const auto& entry : std::filesystem::recursive_directory_iterator(absolute(my_path)))
     {
         if(entry.is_directory())

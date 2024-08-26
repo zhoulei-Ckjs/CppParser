@@ -5,4 +5,4 @@
 " -I./public_headers/usr/lib/gcc/x86_64-linux-gnu/9/include"
 " -I./public_headers/usr/local/include"
 " -I./public_headers/usr/include/x86_64-linux-gnu"
-" -I./public_headers/usr/include -I/home/zl/CppParser/example"
+" -I./public_headers/usr/include"
