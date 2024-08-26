@@ -10,6 +10,11 @@ using json = nlohmann::json;
 
 namespace CPPPARSER
 {
+    enum ErrorCode
+    {
+        Success,             ///< 正常返回数据
+        UnusualNotStatic     ///< 增加非静态成员变量，本来已经进入了解析静态属性，但是又非静态
+    };
     /**
      * @brief 返回类型类
      */
