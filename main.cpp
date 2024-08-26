@@ -287,7 +287,7 @@ public:
 
 static llvm::cl::OptionCategory ToolingSampleCategory("tooling-sample");
 
-void output_json_file(std::map<std::string, CPPPARSER::system>& system_list)
+void output_json_file(std::map<std::string, CPPPARSER::system>& system_list, const std::string& file_output)
 {
     json j;
 
@@ -297,16 +297,16 @@ void output_json_file(std::map<std::string, CPPPARSER::system>& system_list)
         j["systemList"].push_back(system.second.ToJson());
     }
 
-    std::ofstream outFile("output.json");
-    outFile << std::setw(4) << j << std::endl;
+    std::ofstream outFile(file_output);
+//    outFile << std::setw(4) << j << std::endl;
+    outFile << j << std::endl;
     outFile.close();
 }
 
 int WriteCompileCommand(const char* argv)
 {
     auto my_path = std::filesystem::path(argv);
-    std::cout << my_path.string() << std::endl;
-    std::cout << absolute(my_path).string() << std::endl;
+    std::cout << "输入文件夹路径为：" << absolute(my_path).string() << std::endl;
     if(!is_directory(my_path))
     {
         std::cout << argv << "不是文件夹，请提供文件夹!" << std::endl;
@@ -341,13 +341,31 @@ int WriteCompileCommand(const char* argv)
     return 0;
 }
 
+std::string GetOutputFile(const char *argv)
+{
+    auto my_path = std::filesystem::path(argv);
+    std::cout << "输出文件为：" << absolute(my_path).string() << std::endl;
+    return absolute(my_path).string();
+}
+
 int main(int argc, const char **argv)
 {
+    if(argc < 3)
+    {
+        std::cout << "错误，输入参数不足，正确的输入示范为：" << std::endl;
+        std::cout << "\t./FunctionParser <src_dir> <output_file>" << std::endl;
+        return CPPPARSER::ErrorCode::NotEnoughParams;
+    }
+
     /// 创建编译选项
     int ret = WriteCompileCommand(argv[1]);
     if(ret) return ret;
 
+    /// 设置输出文件
+    std::string output_file = GetOutputFile(argv[2]);
+
     /// 创建一个 CommonOptionsParser 实例，用于解析命令行选项。
+    argc--;
     auto ExpectedParser = CommonOptionsParser::create(argc, argv, ToolingSampleCategory);
     if (!ExpectedParser)
     {
@@ -384,6 +402,6 @@ int main(int argc, const char **argv)
     /// 运行 ClangTool，并使用 FunctionFrontendAction 处理输入文件。
     ret = Tool.run(newFrontendActionFactory<FunctionFrontendAction>().get());
 
-    output_json_file(systemList);
+    output_json_file(systemList, output_file);
     return error_code;
 }
