@@ -88,15 +88,25 @@ public:
 
                 /// 抽取 @system 注释的内容
                 std::string system_content = ExtractTools::ExtractSystemContent(commentText);
-                if(systemList.find(system_content) == systemList.end())
+                /// 找到所属系统
+                auto current_system = systemList.find(system_content);
+                if(current_system == systemList.end())
                 {
                     std::cout << "--增加系统：" << system_content << std::endl;
-                    systemList.insert(std::make_pair(system_content, CPPPARSER::system(system_content)));
+                    auto it = systemList.insert(std::make_pair(system_content, CPPPARSER::system(system_content)));
+                    current_system = it.first;
                 }
 
                 /// 抽取 @module 注释内容
                 std::string moduleContent = ExtractTools::ExtractModuleContent(commentText);
-                std::cout << "\t@module: " << moduleContent << std::endl;
+                /// 找到模块
+                auto current_module = current_system->second.module_list.find(moduleContent);
+                if(current_module == current_system->second.module_list.end())
+                {
+                    std::cout << "----增加模块：" << moduleContent << std::endl;
+                    auto it = current_system->second.module_list.insert(std::make_pair(moduleContent, CPPPARSER::module(moduleContent)));
+                    current_module = it.first;
+                }
             }
             else
             {
