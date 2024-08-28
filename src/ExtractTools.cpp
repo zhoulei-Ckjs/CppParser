@@ -2,6 +2,16 @@
 
 #include "ExtractTools.h"
 
+
+bool ExtractTools::haveSuchContent(const std::string& line, const std::string& content)
+{
+    std::regex content_regex(content);
+    std::smatch match;
+    if(std::regex_search(line, match, content_regex))
+        return true;
+    return false;
+}
+
 std::map<std::string, std::string> ExtractTools::ExtractParamsContent(const std::string& commentText)
 {
     /// 正则表达式用于匹配 @param 后跟参数名和描述

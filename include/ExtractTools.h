@@ -7,6 +7,13 @@ class ExtractTools
 {
 public :
     /**
+     * @brief 判断是否匹配
+     * @param line 待匹配的行
+     * @param content 正则
+     * @return 是/否
+     */
+    static bool haveSuchContent(const std::string& line, const std::string& content);
+    /**
      * @brief 提取 param 参数
      * @param commentText 注释字符串
      * @return param 和 解释
