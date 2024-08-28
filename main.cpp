@@ -324,11 +324,7 @@ int WriteCompileCommand(const char* argv)
         }
       ]
     )"_json;
-    std::string command =
-            {
-                #include"public_headers/public_headers.h"
-            };
-    command += " -I" + absolute(my_path).string();
+    std::string command = " -I" + absolute(my_path).string();
     for(const auto& entry : std::filesystem::recursive_directory_iterator(absolute(my_path)))
     {
         if(entry.is_directory())
@@ -386,10 +382,6 @@ int main(int argc, const char **argv)
 
         for(const auto& entry : std::filesystem::recursive_directory_iterator(directory_path))
         {
-            if(entry.is_directory())
-            {
-
-            }
             if(entry.is_regular_file() && entry.path().extension() == ".h")
             {
                 allFiles.push_back(entry.path().string());
