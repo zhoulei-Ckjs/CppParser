@@ -1,6 +1,14 @@
 #ifndef FUNCTIONPARSER_CLIENT_H
 #define FUNCTIONPARSER_CLIENT_H
 
+#include <list>
+#include <map>
+#include<pthread.h>
+#include    <string>
+#include<sys/time.h>
+
+using namespace std;
+
 class Widget;
 
 /**
@@ -20,6 +28,18 @@ public :
      * @name 发送数据
      */
     void Send(char* buf, int size);
+    /**
+     * @brief 测试string
+     * @param test_string 测试字符串
+     * @return 返回字符串
+     */
+    std::string testString(std::string test_string);
+    /**
+     * @brief 测试timeval
+     * @param t 输入timeval
+     * @return 返回timeval
+     */
+    timeval& testTimeval(const timeval& t);
 private :
     /**
      * @brief 客户端套接子
@@ -32,6 +52,42 @@ private :
      * @name 窗口类
      */
     static Widget abc;
+
+    /**
+     * @brief 测试list
+     * @name list测试
+     */
+    std::list<Client> test_list;
+    /**
+     * @brief 测试map
+     * @name map 测试
+     */
+    map<Client*> test_map;
+    /**
+     * @brief 测试pthread_mutex_t
+     * @name pthread_mutex_t测试
+     */
+    pthread_mutex_t test_pthread_mutex_t;
+    /**
+     * @brief 测试pthread_mutexattr_t
+     * @brief pthread_mutexattr_t测试
+     */
+    pthread_mutexattr_t test_pthread_mutexattr_t;
+    /**
+     * @brief 测试pthread_rwlock_t
+     * @name pthread_rwlock_t测试
+     */
+    pthread_rwlock_t test_pthread_rwlock_t;
+    /**
+     * @brief 测试string
+     * @name string测试
+     */
+    string test_string;
+    /**
+     * @brief 测试timeval
+     * @name timeval测试
+     */
+    timeval test_timeval;
 };
 
 #endif //FUNCTIONPARSER_CLIENT_H
