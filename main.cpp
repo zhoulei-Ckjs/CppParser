@@ -100,12 +100,26 @@ public:
                 /// 抽取 @module 注释内容
                 std::string moduleContent = ExtractTools::ExtractModuleContent(commentText);
                 /// 找到模块
-                auto current_module = current_system->second.module_list.find(moduleContent);
-                if(current_module == current_system->second.module_list.end())
+                auto current_module = current_system->second._module_list.find(moduleContent);
+                if(current_module == current_system->second._module_list.end())
                 {
                     std::cout << "----增加模块：" << moduleContent << std::endl;
-                    auto it = current_system->second.module_list.insert(std::make_pair(moduleContent, CPPPARSER::module(moduleContent)));
+                    auto it = current_system->second._module_list.insert(std::make_pair(moduleContent, CPPPARSER::module(moduleContent)));
                     current_module = it.first;
+                }
+
+                /// 抽取 @sub_module 注释内容
+                std::string sub_module_content = ExtractTools::ExtractSubModuleContent(commentText);
+                if(!sub_module_content.empty())
+                {
+                    /// 找到子模块
+                    auto current_sub_module = current_module->second._sub_module_list.find(sub_module_content);
+                    if(current_sub_module == current_module->second._sub_module_list.end())
+                    {
+                        std::cout << "------增加子模块：" << sub_module_content << std::endl;
+                        auto it = current_module->second._sub_module_list.insert(std::make_pair(sub_module_content, CPPPARSER::module(sub_module_content)));
+                        current_module = it.first;
+                    }
                 }
             }
             else
