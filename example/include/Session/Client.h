@@ -8,8 +8,11 @@
 #include<sys/time.h>
 
 #include "UnknownClass.h"
+#include "fjaljfldsja.h"
 
 using namespace std;
+
+#include "fjiojfja;fdsafd.h"
 
 class Widget;
 

@@ -47,6 +47,12 @@ public:
             if (FilePath.find(file_patch) == std::string::npos)
                 return true;
 
+            if (!Declaration->isCompleteDefinition()) {
+                std::cout << "Warning: " << Declaration->getNameAsString() << " not fully defined!" << std::endl;
+            } else {
+                std::cout << Declaration->getNameAsString() << " is fully defined." << std::endl;
+            }
+
             std::cout << "类: " << Declaration->getNameAsString();
 
             if (Declaration->isCompleteDefinition())
@@ -275,10 +281,29 @@ public:
 private:
     ClassVisitor _visitor;
 };
+class IgnoreIncludeFileCallbacks : public clang::PPCallbacks {
+public:
+    explicit IgnoreIncludeFileCallbacks(clang::SourceManager &SM) : SM(SM) {}
+
+    bool FileNotFound(clang::StringRef FileName) override
+    {
+        llvm::errs() << "Warning: " << FileName << " not found, ignoring.\n";
+        return true;
+    }
+
+private:
+    clang::SourceManager &SM;
+};
 
 class FunctionFrontendAction : public ASTFrontendAction
 {
 public:
+    void ExecuteAction() override
+    {
+        clang::CompilerInstance &CI = getCompilerInstance();
+        CI.getPreprocessor().addPPCallbacks(std::make_unique<IgnoreIncludeFileCallbacks>(CI.getSourceManager()));
+        clang::ASTFrontendAction::ExecuteAction();
+    }
     std::unique_ptr<ASTConsumer> CreateASTConsumer(CompilerInstance &CI, StringRef file) override
     {
         /// 抑制所有诊断信息
