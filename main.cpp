@@ -499,6 +499,72 @@ void GetAllUnknownClass(CommonOptionsParser &OptionsParser, std::vector<std::str
     int ret = Tool.run(newFrontendActionFactory<DiagnosticFrontendAction>().get());
 }
 
+
+void PreProcessUnknownClassFile(std::string filePath)
+{
+    /// 读取文件内容
+    std::ifstream inFile(filePath);
+    if (!inFile.is_open())
+    {
+        std::cerr << "无法打开文件: " << filePath << std::endl;
+        return;
+    }
+
+    std::string line;
+    std::string fileContentPre;
+    std::string fileContentPost;
+    std::string toInsert;
+    bool ParsingPreContent = true;
+    bool modified = false;
+
+    /// 逐行读取文件内容
+    while (std::getline(inFile, line))
+    {
+        auto to_be_substitute_it = unknown_classes.begin();
+        for(; to_be_substitute_it != unknown_classes.end(); ++to_be_substitute_it)
+        {
+            if(ExtractTools::haveSuchContent(line, to_be_substitute_it->first))
+            {
+                /// 替换
+                toInsert += to_be_substitute_it->second;
+                modified = true;
+            }
+        }
+
+        if(ExtractTools::haveSuchContent(line, "#include"))
+        {
+            ParsingPreContent = false;
+        }
+        if(ParsingPreContent)
+            fileContentPre += line;
+        else
+            fileContentPost += line;
+    }
+
+    inFile.close();
+
+    /// 如果文件内容被修改，重新写入文件
+    if (modified)
+    {
+        std::ofstream outFile(filePath);
+        if (!outFile.is_open())
+        {
+            std::cerr << "无法写入文件: " << filePath << std::endl;
+            return;
+        }
+        outFile << fileContentPre;
+        outFile << toInsert;
+        outFile << fileContentPost;
+        outFile.close();
+        std::cout << "修改了文件: " << filePath << std::endl;
+    }
+}
+void PreProcessAllFile(const std::vector<std::string>& allFiles)
+{
+    for(auto& file : allFiles)
+        PreProcessUnknownClassFile(file);
+}
+
 int main(int argc, const char **argv)
 {
     if(argc < 3)
@@ -544,7 +610,14 @@ int main(int argc, const char **argv)
         std::cout << std::endl;
     }
 
-    GetAllUnknownClass(OptionsParser, allFiles);
+    do
+    {
+        PreProcessAllFile(allFiles);
+        unknown_classes.clear();
+        GetAllUnknownClass(OptionsParser, allFiles);
+    }while(unknown_classes.size() != 0);
+
+    std::cout << unknown_classes.size() << std::endl;
 
     /// 使用 CommonOptionsParser 创建一个 ClangTool 实例。
     ClangTool Tool(OptionsParser.getCompilations(), allFiles);
