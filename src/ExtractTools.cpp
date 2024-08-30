@@ -3,6 +3,23 @@
 #include "ExtractTools.h"
 
 
+/**
+ * @brief 判断是否匹配
+ * @param line 待匹配的行
+ * @param to_regex 正则
+ * @return 是/否
+ */
+std::string ExtractTools::extractUnknownType(const std::string& line, const std::string& to_regex)
+{
+    std::regex return_regex(to_regex);
+    std::smatch match;
+    if(std::regex_search(line, match, return_regex))
+    {
+        return match[1].str();
+    }
+    return "";
+}
+
 bool ExtractTools::haveSuchContent(const std::string& line, const std::string& content)
 {
     std::regex content_regex(content);

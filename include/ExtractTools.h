@@ -9,6 +9,13 @@ public :
     /**
      * @brief 判断是否匹配
      * @param line 待匹配的行
+     * @param to_regex 正则
+     * @return 是/否
+     */
+    static std::string extractUnknownType(const std::string& line, const std::string& to_regex);
+    /**
+     * @brief 判断是否匹配
+     * @param line 待匹配的行
      * @param content 正则
      * @return 是/否
      */
