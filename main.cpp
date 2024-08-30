@@ -11,6 +11,10 @@
 #include <clang/Frontend/CompilerInstance.h>
 #include <clang/Tooling/CommonOptionsParser.h>
 #include <clang/Tooling/Tooling.h>
+#include <clang/Frontend/DiagnosticRenderer.h>
+#include <clang/Frontend/FrontendDiagnostic.h>
+#include <clang/Basic/Diagnostic.h>
+
 #include <nlohmann/json.hpp>
 #include <filesystem>
 
@@ -30,6 +34,29 @@ std::string file_patch = std::filesystem::current_path().string();              
  * @tparam CPPPARSER::system 系统
  */
 static std::map<std::string, CPPPARSER::system> systemList;
+
+class MyDiagnosticConsumer : public DiagnosticConsumer
+{
+public:
+    void HandleDiagnostic(DiagnosticsEngine::Level DiagLevel, const Diagnostic &Info) override
+    {
+        /// 捕获并处理诊断信息
+        if (DiagLevel == DiagnosticsEngine::Error)
+        {
+            SmallString<100> DiagMessage;
+            Info.FormatDiagnostic(DiagMessage);
+
+            /// 检查是否是 "unknown type name" 错误
+            if (StringRef(DiagMessage).starts_with("unknown type name"))
+            {
+                std::cout << "捕获到 unknown type name 错误: " << DiagMessage.c_str() << std::endl;
+            }
+        }
+
+        /// 调用基类方法，以便其他诊断信息仍然能够正常处理
+        DiagnosticConsumer::HandleDiagnostic(DiagLevel, Info);
+    }
+};
 
 class ClassVisitor : public RecursiveASTVisitor<ClassVisitor>
 {
@@ -308,6 +335,7 @@ public:
     {
         /// 抑制所有诊断信息
 //        CI.getDiagnostics().setSuppressAllDiagnostics(true);
+        CI.getDiagnostics().setClient(new MyDiagnosticConsumer, true);
         return std::make_unique<FunctionASTConsumer>(&CI.getASTContext());
     }
 };
