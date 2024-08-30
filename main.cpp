@@ -35,29 +35,6 @@ std::string file_patch = std::filesystem::current_path().string();              
  */
 static std::map<std::string, CPPPARSER::system> systemList;
 
-class MyDiagnosticConsumer : public DiagnosticConsumer
-{
-public:
-    void HandleDiagnostic(DiagnosticsEngine::Level DiagLevel, const Diagnostic &Info) override
-    {
-        /// 捕获并处理诊断信息
-        if (DiagLevel == DiagnosticsEngine::Error)
-        {
-            SmallString<100> DiagMessage;
-            Info.FormatDiagnostic(DiagMessage);
-
-            /// 检查是否是 "unknown type name" 错误
-            if (StringRef(DiagMessage).starts_with("unknown type name"))
-            {
-                std::cout << "捕获到 unknown type name 错误: " << DiagMessage.c_str() << std::endl;
-            }
-        }
-
-        /// 调用基类方法，以便其他诊断信息仍然能够正常处理
-        DiagnosticConsumer::HandleDiagnostic(DiagLevel, Info);
-    }
-};
-
 class ClassVisitor : public RecursiveASTVisitor<ClassVisitor>
 {
 public:
@@ -335,7 +312,7 @@ public:
     {
         /// 抑制所有诊断信息
 //        CI.getDiagnostics().setSuppressAllDiagnostics(true);
-        CI.getDiagnostics().setClient(new MyDiagnosticConsumer, true);
+//        CI.getDiagnostics().setClient(new MyDiagnosticConsumer, true);
         return std::make_unique<FunctionASTConsumer>(&CI.getASTContext());
     }
 };
@@ -450,6 +427,60 @@ void PreProcessFile(const std::filesystem::path& filePath)
     }
 }
 
+class MyDiagnosticConsumer : public DiagnosticConsumer
+{
+public:
+    void HandleDiagnostic(DiagnosticsEngine::Level DiagLevel, const Diagnostic &Info) override
+    {
+        /// 捕获并处理诊断信息
+        if (DiagLevel == DiagnosticsEngine::Error)
+        {
+            SmallString<100> DiagMessage;
+            Info.FormatDiagnostic(DiagMessage);
+
+            /// 检查是否是 "unknown type name" 错误
+            if (StringRef(DiagMessage).starts_with("unknown type name"))
+            {
+
+            }
+            std::cout << "捕获到 unknown type name 错误: " << DiagMessage.c_str() << std::endl;
+        }
+
+        /// 调用基类方法，以便其他诊断信息仍然能够正常处理
+        DiagnosticConsumer::HandleDiagnostic(DiagLevel, Info);
+    }
+};
+
+class DiagnosticASTConsumer : public ASTConsumer
+{
+public:
+    explicit DiagnosticASTConsumer(ASTContext *Context)
+    {}
+};
+class DiagnosticFrontendAction : public ASTFrontendAction
+{
+public:
+    void ExecuteAction() override
+    {
+        clang::CompilerInstance &CI = getCompilerInstance();
+        CI.getDiagnostics().setClient(new MyDiagnosticConsumer, true);
+        CI.getPreprocessor().addPPCallbacks(std::make_unique<IgnoreIncludeFileCallbacks>(CI.getSourceManager()));
+        clang::ASTFrontendAction::ExecuteAction();
+    }
+    std::unique_ptr<ASTConsumer> CreateASTConsumer(CompilerInstance &CI, StringRef file) override
+    {
+        return std::make_unique<DiagnosticASTConsumer>(&CI.getASTContext());
+    }
+};
+void GetAllUnknownClass(CommonOptionsParser &OptionsParser, std::vector<std::string>& allFiles)
+{
+    /// 使用 CommonOptionsParser 创建一个 ClangTool 实例。
+    ClangTool Tool(OptionsParser.getCompilations(), allFiles);
+
+    /// 运行 ClangTool，并使用 DiagnosticFrontendAction 处理输入文件。
+    int ret = Tool.run(newFrontendActionFactory<DiagnosticFrontendAction>().get());
+}
+
 int main(int argc, const char **argv)
 {
     if(argc < 3)
@@ -494,6 +525,8 @@ int main(int argc, const char **argv)
         }
         std::cout << std::endl;
     }
+
+    GetAllUnknownClass(OptionsParser, allFiles);
 
     /// 使用 CommonOptionsParser 创建一个 ClangTool 实例。
     ClangTool Tool(OptionsParser.getCompilations(), allFiles);
