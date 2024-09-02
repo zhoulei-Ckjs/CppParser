@@ -18,7 +18,11 @@ public :
      */
     void Send(char* buf, int size);
 private :
-    int fd;     ///< 客户端套接子
+    /**
+     * @brief 客户端套接子
+     * @name 套接子
+     */
+    int fd;
 };
 
 #endif //FUNCTIONPARSER_CLIENT_H

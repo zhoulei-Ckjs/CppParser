@@ -123,7 +123,7 @@ public:
                 }
 
                 /// 抽取 @name 注释内容
-                std::string class_name_content = ExtractTools::ExtractClassContent(commentText);
+                std::string class_name_content = ExtractTools::ExtractNameContent(commentText);
                 /// 抽取 @brief 的内容
                 std::string class_brief_content = ExtractTools::ExtractBriefContent(commentText);
                 /// 找到类
@@ -131,10 +131,36 @@ public:
                 if(current_class == current_module->second._class_list.end())
                 {
                     std::cout << "--------增加类：" << Declaration->getNameAsString() << std::endl;
-                    current_module->second._class_list.insert(std::make_pair(Declaration->getNameAsString(), CPPPARSER::class_(
+                    auto it = current_module->second._class_list.insert(std::make_pair(Declaration->getNameAsString(), CPPPARSER::_class(
                             moduleContent + sub_module_content, Declaration->getNameAsString(),
                             system_content, moduleContent, sub_module_content, class_name_content,
                             class_brief_content)));
+                    current_class = it.first;
+                }
+
+                /// 找到所有成员变量
+                for (auto it = Declaration->field_begin(); it != Declaration->field_end(); ++it)
+                {
+                    FieldDecl *field = *it;
+                    std::cout << "----------增加成员变量: " << field->getNameAsString() << std::endl;
+
+                    /// 获取并打印成员变量的注释
+                    std::string commentText;
+                    if (const RawComment *Comment = _context->getRawCommentForDeclNoCache(field))
+                        commentText = Comment->getRawText(_context->getSourceManager()).str();
+                    /// 提取 @name
+                    std::string current_name = ExtractTools::ExtractNameContent(commentText);
+                    /// 提取 @brief
+                    std::string current_brief = ExtractTools::ExtractBriefContent(commentText);
+                    auto current_field = current_class->second.field_list.find(field->getNameAsString());
+                    if(current_field == current_class->second.field_list.end())
+                    {
+                        current_class->second.field_list.insert(std::make_pair(field->getNameAsString(),
+                                                                               CPPPARSER::_field(Declaration->getNameAsString(),
+                                                                                                 field->getType().getAsString(),
+                                                                                                 field->getNameAsString(), field->getAccess(),
+                                                                                                 current_name, current_brief)));
+                    }
                 }
             }
             else

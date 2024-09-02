@@ -3,6 +3,7 @@
 
 #include <map>
 #include <vector>
+#include <clang/Basic/Specifiers.h>
 
 namespace CPPPARSER
 {
@@ -56,33 +57,38 @@ namespace CPPPARSER
     /**
      * @brief 类属性列表
      */
-    class fieldList
+    class _field
     {
     public :
-        std::string className;      ///< 类名
-        std::string fieldType;      ///< 属性类型
-        std::string fieldName;      ///< 属性英文名
-        std::string visibility;     ///< 可见性
-        std::string name;           ///< @name
-        std::string description;    ///< @description
-        bool ignore;                ///< 是否忽略
+        explicit _field(std::string class_name, std::string field_type, std::string field_name,
+                        clang::AccessSpecifier visibility, std::string name, std::string description,
+                        bool ignore = false);
+    public :
+        std::string _class_name;    ///< 类名
+        std::string _field_type;    ///< 属性类型
+        std::string _field_name;    ///< 属性英文名
+        std::string _visibility;    ///< 可见性
+        std::string _name;          ///< @name
+        std::string _description;   ///< @description
+        bool _ignore;               ///< 是否忽略
     };
 
     /**
      * @brief 类信息类
      */
-    class class_
+    class _class
     {
     public :
-        class_(std::string packageName, std::string class_name,
-               std::string system, std::string module, std::string sub_module, std::string name,
-               std::string description);
+        explicit _class(std::string packageName, std::string class_name,
+                        std::string system, std::string module, std::string sub_module, std::string name,
+                        std::string description, bool ignore = false);
 
     public :
         std::string _packageName;   ///< 中间件模块
         std::string _class_name;    ///< 中间件名字
-        std::vector<fieldList> field_list;  ///< 属性列表
-        std::vector<methodList> method_list;///< 方法列表
+        std::map<std::string, _field> field_list;   ///< 属性列表
+        std::vector<methodList> method_list;        ///< 方法列表
+        /// TODO
         bool isInterface;           ///< 是否为接口
         bool isEnum;                ///< 是否为枚举
         bool isAnnotation;          ///< 是否为注解
@@ -92,7 +98,7 @@ namespace CPPPARSER
         std::string _sub_module;    ///< 所属子模块
         std::string _name;          ///< @name指定的中文类名
         std::string _description;   ///< @brief指定的描述信息
-        bool ignore;                ///< 是否忽略
+        bool _ignore;                ///< 是否忽略
     };
 
     /**
@@ -106,7 +112,7 @@ namespace CPPPARSER
     public :
         std::map<std::string, module> _sub_module_list;           ///< 子模块集合
         std::string _name;                                        ///< 模块名字@module
-        std::map<std::string, class_> _class_list;                ///< 类
+        std::map<std::string, _class> _class_list;                ///< 类
     };
 
     /**
