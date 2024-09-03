@@ -7,6 +7,12 @@ class ExtractTools
 {
 public :
     /**
+     * @brief 获取 @return 的内容
+     * @param commentText 注释字符串
+     * @return 注释中 @return 指定的内容
+     */
+    static std::string ExtractReturnContent(const std::string& commentText);
+    /**
      * @brief 抽取 brief 的内容
      * @param commentText 注释字符串
      * @return 注释中 @brief 指定的内容

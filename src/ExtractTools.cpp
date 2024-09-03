@@ -2,6 +2,17 @@
 
 #include "ExtractTools.h"
 
+std::string ExtractTools::ExtractReturnContent(const std::string& commentText)
+{
+    std::regex return_regex(R"(@return\s+(\S+))");
+    std::smatch match;
+    if(std::regex_search(commentText, match, return_regex))
+    {
+        return match[1].str();
+    }
+    return "";
+}
+
 /**
  * @brief 抽取 brief 的内容
  * @param commentText 注释字符串
@@ -11,7 +22,7 @@ std::string ExtractTools::ExtractBriefContent(const std::string& commentText)
 {
     std::regex brief_regex(R"(@brief\s+(\S+))");
     std::smatch match;
-    if(std::regex_search(commentText, match, brief_regex));
+    if(std::regex_search(commentText, match, brief_regex))
     {
         return match[1].str();
     }

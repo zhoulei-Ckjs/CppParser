@@ -24,7 +24,7 @@ namespace CPPPARSER
     /**
      * @brief 参数列表
      */
-    class paramList
+    class _param
     {
     public:
         std::string className;      ///< 类名
@@ -39,19 +39,23 @@ namespace CPPPARSER
     /**
      * @brief 方法列表
      */
-    class methodList
+    class _method
     {
     public:
-        std::string className;      ///< 类名
-        std::string visibility;     ///< 可见性
-        std::string methodName;     ///< 方法名
-        std::vector<paramList> param_list;  ///< 参数列表
-        returnType return_type;     ///< 返回类型
-        std::map<std::string, std::string> paramCommentMap; ///< 参数comment map
-        std::string returnTypeComment;      ///< @return
-        std::string name;           ///< 方法名
-        std::string description;    ///< 方法描述
-        bool ignore;                ///< 是否忽略
+        explicit _method(std::string class_name, clang::AccessSpecifier visibility, std::string method_name,
+                         std::string return_type_comment, std::string name, std::string description,
+                         bool ignore = false);
+    public:
+        std::string _class_name;     ///< 类名
+        std::string _visibility;     ///< 可见性
+        std::string _method_name;    ///< 方法名
+        std::map<std::string, _param> _param_list;             ///< 参数列表
+        returnType _return_type;     ///< 返回类型
+        std::map<std::string, std::string> _param_comment_map; ///< 参数comment map
+        std::string _return_type_comment;      ///< @return
+        std::string _name;           ///< 方法名
+        std::string _description;    ///< 方法描述
+        bool _ignore;                ///< 是否忽略
     };
 
     /**
@@ -86,13 +90,15 @@ namespace CPPPARSER
     public :
         std::string _packageName;   ///< 中间件模块
         std::string _class_name;    ///< 中间件名字
-        std::map<std::string, _field> field_list;   ///< 属性列表
-        std::vector<methodList> method_list;        ///< 方法列表
+        std::map<std::string, _field> _field_list;  ///< 属性列表
+        std::map<std::string, _method> _method_list;///< 方法列表
         /// TODO
         bool isInterface;           ///< 是否为接口
+        /// TODO
         bool isEnum;                ///< 是否为枚举
+        /// TODO
         bool isAnnotation;          ///< 是否为注解
-        bool hasMethod;             ///< 是否有方法
+        bool _has_method;           ///< 是否有方法
         std::string _system;        ///< 所属系统
         std::string _module;        ///< 所属模块
         std::string _sub_module;    ///< 所属子模块

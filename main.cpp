@@ -34,36 +34,36 @@ public:
     explicit ClassVisitor(ASTContext *Context) : _context(Context)
     {}
 
-    bool VisitFunctionDecl(FunctionDecl *Declaration)
-    {
-        FullSourceLoc FullLocation = _context->getFullLoc(Declaration->getBeginLoc());
-        if (FullLocation.isValid())
-        {
-            const SourceManager &SM = _context->getSourceManager();
-            StringRef FilePath = SM.getFilename(FullLocation);
-            if (FilePath.find(file_papth) == std::string::npos)
-                return true;
-
-            std::cout << "函数: " << Declaration->getNameInfo().getName().getAsString();
-
-            if (Declaration->hasBody())
-                std::cout << " 有定义" << std::endl;
-            else
-                std::cout << " 没有完整定义" << std::endl;
-
-            if (const RawComment *Comment = _context->getRawCommentForDeclNoCache(Declaration))
-            {
-                std::string commentText = Comment->getRawText(_context->getSourceManager()).str();
-                std::cout << "\t" << commentText << std::endl;
-            }
-            else
-            {
-                std::cout << "\t没有注释" << std::endl;
-            }
-            std::cout << std::endl;
-        }
-        return true;
-    }
+//    bool VisitFunctionDecl(FunctionDecl *Declaration)
+//    {
+//        FullSourceLoc FullLocation = _context->getFullLoc(Declaration->getBeginLoc());
+//        if (FullLocation.isValid())
+//        {
+//            const SourceManager &SM = _context->getSourceManager();
+//            StringRef FilePath = SM.getFilename(FullLocation);
+//            if (FilePath.find(file_papth) == std::string::npos)
+//                return true;
+//
+//            std::cout << "函数: " << Declaration->getNameInfo().getName().getAsString();
+//
+//            if (Declaration->hasBody())
+//                std::cout << " 有定义" << std::endl;
+//            else
+//                std::cout << " 没有完整定义" << std::endl;
+//
+//            if (const RawComment *Comment = _context->getRawCommentForDeclNoCache(Declaration))
+//            {
+//                std::string commentText = Comment->getRawText(_context->getSourceManager()).str();
+//                std::cout << "\t" << commentText << std::endl;
+//            }
+//            else
+//            {
+//                std::cout << "\t没有注释" << std::endl;
+//            }
+//            std::cout << std::endl;
+//        }
+//        return true;
+//    }
 
     bool VisitCXXRecordDecl(CXXRecordDecl *Declaration)
     {
@@ -152,14 +152,42 @@ public:
                     std::string current_name = ExtractTools::ExtractNameContent(commentText);
                     /// 提取 @brief
                     std::string current_brief = ExtractTools::ExtractBriefContent(commentText);
-                    auto current_field = current_class->second.field_list.find(field->getNameAsString());
-                    if(current_field == current_class->second.field_list.end())
+                    auto current_field = current_class->second._field_list.find(field->getNameAsString());
+                    if(current_field == current_class->second._field_list.end())
                     {
-                        current_class->second.field_list.insert(std::make_pair(field->getNameAsString(),
-                                                                               CPPPARSER::_field(Declaration->getNameAsString(),
-                                                                                                 field->getType().getAsString(),
-                                                                                                 field->getNameAsString(), field->getAccess(),
-                                                                                                 current_name, current_brief)));
+                        current_class->second._field_list.insert(std::make_pair(field->getNameAsString(),
+                                                                                CPPPARSER::_field(Declaration->getNameAsString(),
+                                                                                                  field->getType().getAsString(),
+                                                                                                  field->getNameAsString(), field->getAccess(),
+                                                                                                  current_name, current_brief)));
+                    }
+                }
+
+                /// 获取类的所有方法
+                for (auto it = Declaration->method_begin(); it != Declaration->method_end(); ++it)
+                {
+                    current_class->second._has_method = true;
+                    CXXMethodDecl *method = *it;
+                    std::cout << "----------增加成员函数: " << method->getNameAsString() << std::endl;
+
+                    /// 获取方法的注释
+                    std::string current_func_comment;
+                    if (const RawComment *Comment = _context->getRawCommentForDeclNoCache(method))
+                        current_func_comment = Comment->getRawText(_context->getSourceManager()).str();
+
+                    /// 抽取 @return 部分的注释
+                    std::string current_return = ExtractTools::ExtractReturnContent(current_func_comment);
+                    /// 抽取 @name 部分的注释
+                    std::string current_func_name = ExtractTools::ExtractNameContent(current_func_comment);
+                    /// 抽取 @brief 部分的注释
+                    std::string current_func_brief = ExtractTools::ExtractBriefContent(current_func_comment);
+                    auto current_func = current_class->second._method_list.find(method->getNameAsString());
+                    if(current_func == current_class->second._method_list.end())
+                    {
+                        current_class->second._method_list.insert(std::make_pair(method->getNameAsString(),
+                                                                                 CPPPARSER::_method(Declaration->getNameAsString(), method->getAccess(),
+                                                                                                    method->getNameAsString(), current_return,
+                                                                                                    current_func_name, current_func_brief)));
                     }
                 }
             }
