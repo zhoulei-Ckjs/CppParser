@@ -3,6 +3,22 @@
 
 namespace CPPPARSER
 {
+    returnType::returnType()
+    {
+
+    }
+    returnType::returnType(std::string class_name, std::string method_name, std::string param_type,
+                           std::string name, std::string description, bool ignore)
+            : _class_name(class_name), _method_name(method_name), _param_type(param_type),
+              _name(name), _description(description), _ignore(ignore)
+    {
+        std::cout << "--------------类名: " << _class_name << std::endl;
+        std::cout << "--------------方法名: " << _method_name << std::endl;
+        std::cout << "--------------返回类型: " << _param_type << std::endl;
+        std::cout << "--------------中文名: " << _name << std::endl;
+        std::cout << "--------------描述: " << _description << std::endl;
+        std::cout << "--------------是否忽略: " << _ignore << std::endl;
+    }
     _param::_param(std::string class_name, std::string method_name, std::string param_type,
                    std::string param_name, std::string name, std::string description, bool ignore)
             : _class_name(class_name), _method_name(method_name), _param_type(param_type),

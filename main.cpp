@@ -157,13 +157,13 @@ public:
                                                                                                 CPPPARSER::_method(Declaration->getNameAsString(), method->getAccess(),
                                                                                                                    method->getNameAsString(), current_return,
                                                                                                                    current_func_name, current_func_brief)));
-                        auto current_method = it_func.first;
+                        current_func = it_func.first;
 
                         /// 7.提取参数列表
                         for (const ParmVarDecl *param : method->parameters())
                         {
                             std::cout << "------------增加参数: " << param->getNameAsString() << std::endl;
-                            current_method->second._param_list.insert(std::make_pair(
+                            current_func->second._param_list.insert(std::make_pair(
                                     param->getNameAsString(),
                                     CPPPARSER::_param(
                                             Declaration->getNameAsString(), method->getNameAsString(),
@@ -172,6 +172,14 @@ public:
                                     )
                             ));
                         }
+
+                        /// 8.提取返回类型
+                        std::cout << "------------增加返回类型: " << method->getDeclaredReturnType().getAsString() << std::endl;
+                        current_func->second._return_type = CPPPARSER::returnType(
+                                Declaration->getNameAsString(), method->getNameAsString(),
+                                method->getDeclaredReturnType().getAsString(), current_return,
+                                current_return
+                        );
                     }
                 }
             }
