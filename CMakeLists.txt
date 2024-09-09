@@ -4,7 +4,6 @@ project(FunctionParser)
 set(JSON_BuildTests OFF CACHE INTERNAL "")
 add_subdirectory(third_party/json)
 
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
 
 # 寻找 LLVM 和 Clang
