@@ -23,7 +23,7 @@ cmake --install build
 
 编译Windows
 ```shell
-cmake -G Ninja -S llvm -B build -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra" -DCMAKE_BUILD_TYPE=Debug -DLLVM_INSTALL_UTILS=ON -DLLVM_ENABLE_RTTI=ON -DLLVM_ENABLE_EH=ON -DCMAKE_CXX_FLAGS="/utf-8" -DCMAKE_INSTALL_PREFIX=../lib
+cmake -G Ninja -S llvm -B build -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra" -DCMAKE_BUILD_TYPE=Release -DLLVM_INSTALL_UTILS=ON -DLLVM_ENABLE_RTTI=ON -DLLVM_ENABLE_EH=ON -DCMAKE_CXX_FLAGS="/utf-8" -DLLVM_BUILD_LLVM_DYLIB=OFF -DLLVM_LINK_LLVM_DYLIB=OFF -DBUILD_SHARED_LIBS=OFF -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded -DLLVM_TARGETS_TO_BUILD="X86" -DCMAKE_INSTALL_PREFIX=../slib
 ninja -C build install
 ```
 
@@ -38,7 +38,7 @@ cmake --build build
 
 Windows编译
 ```shell
-cmake -G Ninja -S . -B build -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH=../lib -DCMAKE_CXX_FLAGS="/utf-8"
+cmake -G Ninja -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=../slib -DCMAKE_CXX_FLAGS="/utf-8"
 ninja -C build
 FunctionParser example output.json
 ```
