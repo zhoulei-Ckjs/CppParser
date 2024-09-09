@@ -7,6 +7,12 @@ class ExtractTools
 {
 public :
     /**
+     * @brief 提取 param 参数
+     * @param commentText 注释字符串
+     * @return param 和 解释
+     */
+    static std::map<std::string, std::string> ExtractParamsContent(const std::string& commentText);
+    /**
      * @brief 获取 @return 的内容
      * @param commentText 注释字符串
      * @return 注释中 @return 指定的内容
