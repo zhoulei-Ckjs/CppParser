@@ -245,7 +245,9 @@ void output_json_file(std::map<std::string, CPPPARSER::system>& systemList)
         j["systemList"].push_back(system.second.ToJson());
     }
 
-    std::cout << to_string(j) << std::endl;
+    std::ofstream outFile("output.json");
+    outFile << std::setw(4) << j << std::endl;
+    outFile.close();
 }
 
 int main(int argc, const char **argv)
