@@ -5,7 +5,7 @@
  * @brief 客户端类
  * @system 解析服务
  * @module 会话模块
- * @sub_module 客户端子模块
+ * @sub_module
  * @name 客户端类
  */
 class Client
