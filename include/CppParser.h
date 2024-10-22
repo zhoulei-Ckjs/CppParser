@@ -108,11 +108,8 @@ namespace CPPPARSER
         std::string _class_name;    ///< 中间件名字
         std::map<std::string, _field> _field_list;  ///< 属性列表
         std::map<std::string, _method> _method_list;///< 方法列表
-        /// TODO
         bool isInterface;           ///< 是否为接口
-        /// TODO
         bool isEnum;                ///< 是否为枚举
-        /// TODO
         bool isAnnotation;          ///< 是否为注解
         bool _has_method;           ///< 是否有方法
         std::string _system;        ///< 所属系统
