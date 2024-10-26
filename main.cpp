@@ -250,8 +250,28 @@ void output_json_file(std::map<std::string, CPPPARSER::system>& systemList)
     outFile.close();
 }
 
+void WriteCompileCommand()
+{
+    auto j = R"(
+      [
+        {
+          "directory": ".",
+          "command": "/usr/bin/g++ -frtti -fexceptions -g -std=gnu++17 -fdiagnostics-color=always   -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS",
+          "file": "/a.cpp",
+          "output": "/a.o"
+        }
+      ]
+    )"_json;
+    std::ofstream outFile("compile_commands.json");
+    outFile << j << std::endl;
+    outFile.close();
+}
+
 int main(int argc, const char **argv)
 {
+    /// 创建编译选项
+    WriteCompileCommand();
+
     /// 创建一个 CommonOptionsParser 实例，用于解析命令行选项。
     auto ExpectedParser = CommonOptionsParser::create(argc, argv, ToolingSampleCategory);
     if (!ExpectedParser)
