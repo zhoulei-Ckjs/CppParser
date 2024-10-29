@@ -12,6 +12,7 @@
 #include <clang/Tooling/CommonOptionsParser.h>
 #include <clang/Tooling/Tooling.h>
 #include <nlohmann/json.hpp>
+#include <filesystem>
 
 #include "ExtractTools.h"
 #include "CppParser.h"
@@ -20,7 +21,7 @@ using namespace clang;
 using namespace clang::tooling;
 using json = nlohmann::json;
 
-const char * file_papth = "/home/zl/CppParser";                 ///< 只解析这个路径下的文件
+std::string file_patch = std::filesystem::current_path().string();                 ///< 只解析这个路径下的文件
 /**
  * @brief 系统列表
  * @tparam std::string 系统名
@@ -41,7 +42,7 @@ public:
         {
             const SourceManager &SM = _context->getSourceManager();
             StringRef FilePath = SM.getFilename(FullLocation);
-            if (FilePath.find(file_papth) == std::string::npos)
+            if (FilePath.find(file_patch.c_str()) == std::string::npos)
                 return true;
 
             std::cout << "类: " << Declaration->getNameAsString();
