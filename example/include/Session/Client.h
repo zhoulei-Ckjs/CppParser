@@ -1,6 +1,8 @@
 #ifndef FUNCTIONPARSER_CLIENT_H
 #define FUNCTIONPARSER_CLIENT_H
 
+class Widget;
+
 /**
  * @brief 客户端类
  * @system 解析服务
@@ -24,6 +26,12 @@ private :
      * @name 套接子
      */
     int fd;
+
+    /**
+     * @brief 测试窗口类
+     * @name 窗口类
+     */
+    static Widget abc;
 };
 
 #endif //FUNCTIONPARSER_CLIENT_H

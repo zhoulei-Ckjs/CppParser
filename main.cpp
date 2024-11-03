@@ -21,6 +21,7 @@ using namespace clang;
 using namespace clang::tooling;
 using json = nlohmann::json;
 
+CPPPARSER::ErrorCode error_code = CPPPARSER::ErrorCode::Success;                   ///< 错误码
 std::string file_patch = std::filesystem::current_path().string();                 ///< 只解析这个路径下的文件
 /**
  * @brief 系统列表
@@ -109,27 +110,77 @@ public:
                 }
 
                 /// 5.找到所有成员变量
-                for (auto it = Declaration->field_begin(); it != Declaration->field_end(); ++it)
+                for (const auto *decl : Declaration->decls())
                 {
-                    FieldDecl *field = *it;
-                    std::cout << "----------增加成员变量: " << field->getNameAsString() << std::endl;
-
-                    /// 获取并打印成员变量的注释
-                    std::string commentText;
-                    if (const RawComment *Comment = _context->getRawCommentForDeclNoCache(field))
-                        commentText = Comment->getRawText(_context->getSourceManager()).str();
-                    /// 提取 @name
-                    std::string current_name = ExtractTools::ExtractNameContent(commentText);
-                    /// 提取 @brief
-                    std::string current_brief = ExtractTools::ExtractBriefContent(commentText);
-                    auto current_field = current_class->second._field_list.find(field->getNameAsString());
-                    if(current_field == current_class->second._field_list.end())
+                    if (const auto *field = llvm::dyn_cast<FieldDecl>(decl))
                     {
-                        current_class->second._field_list.insert(std::make_pair(field->getNameAsString(),
-                                                                                CPPPARSER::_field(Declaration->getNameAsString(),
-                                                                                                  field->getType().getAsString(),
-                                                                                                  field->getNameAsString(), field->getAccess(),
-                                                                                                  current_name, current_brief)));
+                        std::cout << "----------增加成员变量: " << field->getNameAsString() << std::endl;
+
+                        /// 获取并打印成员变量的注释
+                        std::string comment_field_text;
+                        if (const RawComment *Comment = _context->getRawCommentForDeclNoCache(field))
+                            comment_field_text = Comment->getRawText(_context->getSourceManager()).str();
+                        /// 提取 @name
+                        std::string current_name = ExtractTools::ExtractNameContent(comment_field_text);
+                        /// 提取 @brief
+                        std::string current_brief = ExtractTools::ExtractBriefContent(comment_field_text);
+                        auto current_field = current_class->second._field_list.find(field->getNameAsString());
+                        if(current_field == current_class->second._field_list.end())
+                        {
+                            current_class->second._field_list.insert(std::make_pair(field->getNameAsString(),
+                                                                                    CPPPARSER::_field(Declaration->getNameAsString(),
+                                                                                                      field->getType().getAsString(),
+                                                                                                      field->getNameAsString(), field->getAccess(),
+                                                                                                      current_name, current_brief)));
+                        }
+                    }
+                    else if (const auto *var = llvm::dyn_cast<VarDecl>(decl))
+                    {
+                        if (var->isStaticDataMember())
+                        {
+                            std::cout << "----------增加静态成员变量: " << var->getNameAsString() << std::endl;
+                            /// 获取并打印成员变量的注释
+                            std::string comment_var_text;
+                            if (const RawComment *Comment = _context->getRawCommentForDeclNoCache(var))
+                                comment_var_text = Comment->getRawText(_context->getSourceManager()).str();
+                            /// 提取 @name
+                            std::string current_name = ExtractTools::ExtractNameContent(comment_var_text);
+                            /// 提取 @brief
+                            std::string current_brief = ExtractTools::ExtractBriefContent(comment_var_text);
+                            auto current_field = current_class->second._field_list.find(var->getNameAsString());
+                            if(current_field == current_class->second._field_list.end())
+                            {
+                                current_class->second._field_list.insert(std::make_pair(var->getNameAsString(),
+                                                                                        CPPPARSER::_field(Declaration->getNameAsString(),
+                                                                                                          var->getType().getAsString(),
+                                                                                                          var->getNameAsString(), var->getAccess(),
+                                                                                                          current_name, current_brief)));
+                            }
+                        }
+                        else
+                        {
+                            std::cout << "----------增加非静态成员变量: " << var->getNameAsString() << std::endl;
+                            error_code = CPPPARSER::ErrorCode::UnusualNotStatic;
+                        }
+                    }
+                    else if (llvm::isa<CXXMethodDecl>(decl))
+                    {
+                        // 这是一个成员函数
+//                        std::cout << "成员函数处理" << std::endl;
+                    }
+                    else if (llvm::isa<TypedefDecl>(decl))
+                    {
+                        // 这是一个 typedef 声明
+//                        std::cout << "typedef处理" << std::endl;
+                    }
+                    else if (llvm::isa<UsingDecl>(decl))
+                    {
+                        // 这是一个 using 声明
+//                        std::cout << "Using处理" << std::endl;
+                    }
+                    else
+                    {
+//                        std::cout << "----------增加未知成员变量: " << std::endl;
                     }
                 }
 
@@ -307,5 +358,5 @@ int main(int argc, const char **argv)
     int ret = Tool.run(newFrontendActionFactory<FunctionFrontendAction>().get());
 
     output_json_file(systemList);
-    return 0;
+    return error_code;
 }
