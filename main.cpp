@@ -43,7 +43,7 @@ public:
         {
             const SourceManager &SM = _context->getSourceManager();
             StringRef FilePath = SM.getFilename(FullLocation);
-            if (FilePath.find(file_patch.c_str()) == std::string::npos)
+            if (FilePath.find(file_patch) == std::string::npos)
                 return true;
 
             std::cout << "类: " << Declaration->getNameAsString();
@@ -118,8 +118,8 @@ public:
 
                         /// 获取并打印成员变量的注释
                         std::string comment_field_text;
-                        if (const RawComment *Comment = _context->getRawCommentForDeclNoCache(field))
-                            comment_field_text = Comment->getRawText(_context->getSourceManager()).str();
+                        if (const RawComment *field_raw_comment = _context->getRawCommentForDeclNoCache(field))
+                            comment_field_text = field_raw_comment->getRawText(_context->getSourceManager()).str();
                         /// 提取 @name
                         std::string current_name = ExtractTools::ExtractNameContent(comment_field_text);
                         /// 提取 @brief
@@ -141,8 +141,8 @@ public:
                             std::cout << "----------增加静态成员变量: " << var->getNameAsString() << std::endl;
                             /// 获取并打印成员变量的注释
                             std::string comment_var_text;
-                            if (const RawComment *Comment = _context->getRawCommentForDeclNoCache(var))
-                                comment_var_text = Comment->getRawText(_context->getSourceManager()).str();
+                            if (const RawComment *var_raw_comment = _context->getRawCommentForDeclNoCache(var))
+                                comment_var_text = var_raw_comment->getRawText(_context->getSourceManager()).str();
                             /// 提取 @name
                             std::string current_name = ExtractTools::ExtractNameContent(comment_var_text);
                             /// 提取 @brief
@@ -193,8 +193,8 @@ public:
 
                     /// 获取方法的注释
                     std::string current_func_comment;
-                    if (const RawComment *Comment = _context->getRawCommentForDeclNoCache(method))
-                        current_func_comment = Comment->getRawText(_context->getSourceManager()).str();
+                    if (const RawComment *method_raw_comment = _context->getRawCommentForDeclNoCache(method))
+                        current_func_comment = method_raw_comment->getRawText(_context->getSourceManager()).str();
 
                     /// 抽取 @return 部分的注释
                     std::string current_return = ExtractTools::ExtractReturnContent(current_func_comment);
@@ -265,7 +265,7 @@ public:
     explicit FunctionASTConsumer(ASTContext *Context) : _visitor(Context)
     {}
 
-    virtual void HandleTranslationUnit(ASTContext &Context)
+    void HandleTranslationUnit(ASTContext &Context) override
     {
         _visitor.TraverseDecl(Context.getTranslationUnitDecl());
     }
@@ -277,7 +277,7 @@ private:
 class FunctionFrontendAction : public ASTFrontendAction
 {
 public:
-    virtual std::unique_ptr<ASTConsumer> CreateASTConsumer(CompilerInstance &CI, StringRef file)
+    std::unique_ptr<ASTConsumer> CreateASTConsumer(CompilerInstance &CI, StringRef file) override
     {
         /// 抑制所有诊断信息
         CI.getDiagnostics().setSuppressAllDiagnostics(true);
@@ -287,12 +287,12 @@ public:
 
 static llvm::cl::OptionCategory ToolingSampleCategory("tooling-sample");
 
-void output_json_file(std::map<std::string, CPPPARSER::system>& systemList)
+void output_json_file(std::map<std::string, CPPPARSER::system>& system_list)
 {
     json j;
 
     /// 获取系统或服务
-    for(auto& system : systemList)
+    for(auto& system : system_list)
     {
         j["systemList"].push_back(system.second.ToJson());
     }
