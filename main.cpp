@@ -280,7 +280,7 @@ public:
     std::unique_ptr<ASTConsumer> CreateASTConsumer(CompilerInstance &CI, StringRef file) override
     {
         /// 抑制所有诊断信息
-        CI.getDiagnostics().setSuppressAllDiagnostics(true);
+//        CI.getDiagnostics().setSuppressAllDiagnostics(true);
         return std::make_unique<FunctionASTConsumer>(&CI.getASTContext());
     }
 };
@@ -308,14 +308,17 @@ void WriteCompileCommand()
       [
         {
           "directory": ".",
-          "command": "/usr/bin/g++ -frtti -fexceptions -g -std=gnu++17 -fdiagnostics-color=always   -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS",
           "file": "/a.cpp",
           "output": "/a.o"
         }
       ]
     )"_json;
+    std::string command = " -I/usr/include/c++/9 -I/usr/include/x86_64-linux-gnu/c++/9 -I/usr/include/c++/9/backward -I/usr/lib/gcc/x86_64-linux-gnu/9/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include -I/home/zl/CppParser/example";
+    command = "/usr/bin/g++" + command + " -frtti -fexceptions -g -std=gnu++17 -fdiagnostics-color=always   -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS";
+    j[0]["command"] = command.c_str();
+
     std::ofstream outFile("compile_commands.json");
-    outFile << j << std::endl;
+    outFile << j.dump(4);
     outFile.close();
 }
 
@@ -342,6 +345,10 @@ int main(int argc, const char **argv)
 
         for(const auto& entry : std::filesystem::recursive_directory_iterator(directory_path))
         {
+            if(entry.is_directory())
+            {
+
+            }
             if(entry.is_regular_file() && entry.path().extension() == ".h")
             {
                 allFiles.push_back(entry.path().string());
