@@ -14,7 +14,8 @@ namespace CPPPARSER
     {
         Success,             ///< 正常返回数据
         UnusualNotStatic,    ///< 增加非静态成员变量，本来已经进入了解析静态属性，但是又非静态
-        NotDirectory         ///< 启动程序时提供的不是文件夹名字
+        NotDirectory,        ///< 启动程序时提供的不是文件夹名字
+        NotEnoughParams      ///< 给定参数不足 3 个
     };
     /**
      * @brief 返回类型类
