@@ -302,8 +302,17 @@ void output_json_file(std::map<std::string, CPPPARSER::system>& system_list)
     outFile.close();
 }
 
-void WriteCompileCommand()
+int WriteCompileCommand(const char* argv)
 {
+    auto my_path = std::filesystem::path(argv);
+    std::cout << my_path.string() << std::endl;
+    std::cout << absolute(my_path).string() << std::endl;
+    if(!is_directory(my_path))
+    {
+        std::cout << argv << "不是文件夹，请提供文件夹!" << std::endl;
+        return CPPPARSER::ErrorCode::NotDirectory;
+    }
+
     auto j = R"(
       [
         {
@@ -313,19 +322,30 @@ void WriteCompileCommand()
         }
       ]
     )"_json;
-    std::string command = " -I/usr/include/c++/9 -I/usr/include/x86_64-linux-gnu/c++/9 -I/usr/include/c++/9/backward -I/usr/lib/gcc/x86_64-linux-gnu/9/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include -I/home/zl/CppParser/example";
+    std::string command =
+            {
+#include"public_headers/public_headers.h"
+            };
+    for(const auto& entry : std::filesystem::recursive_directory_iterator(absolute(my_path)))
+    {
+        if(entry.is_directory())
+            command += " -I" + entry.path().string();
+    }
+
     command = "/usr/bin/g++" + command + " -frtti -fexceptions -g -std=gnu++17 -fdiagnostics-color=always   -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS";
     j[0]["command"] = command.c_str();
 
     std::ofstream outFile("compile_commands.json");
     outFile << j.dump(4);
     outFile.close();
+    return 0;
 }
 
 int main(int argc, const char **argv)
 {
     /// 创建编译选项
-    WriteCompileCommand();
+    int ret = WriteCompileCommand(argv[1]);
+    if(ret) return ret;
 
     /// 创建一个 CommonOptionsParser 实例，用于解析命令行选项。
     auto ExpectedParser = CommonOptionsParser::create(argc, argv, ToolingSampleCategory);
@@ -362,7 +382,7 @@ int main(int argc, const char **argv)
     ClangTool Tool(OptionsParser.getCompilations(), allFiles);
 
     /// 运行 ClangTool，并使用 FunctionFrontendAction 处理输入文件。
-    int ret = Tool.run(newFrontendActionFactory<FunctionFrontendAction>().get());
+    ret = Tool.run(newFrontendActionFactory<FunctionFrontendAction>().get());
 
     output_json_file(systemList);
     return error_code;
