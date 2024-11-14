@@ -16,6 +16,7 @@
 
 #include "ExtractTools.h"
 #include "CppParser.h"
+#include "CommonHeader.h"
 
 using namespace clang;
 using namespace clang::tooling;
@@ -347,6 +348,54 @@ std::string GetOutputFile(const char *argv)
     return absolute(my_path).string();
 }
 
+void PreProcessFile(const std::filesystem::path& filePath)
+{
+    /// 读取文件内容
+    std::ifstream inFile(filePath);
+    if (!inFile.is_open())
+    {
+        std::cerr << "无法打开文件: " << filePath << std::endl;
+        return;
+    }
+
+    std::string line;
+    std::string fileContent;
+    bool modified = false;
+
+    /// 逐行读取文件内容
+    while (std::getline(inFile, line))
+    {
+        auto to_be_substitute_it = g_header_substitute.begin();
+        for(; to_be_substitute_it != g_header_substitute.end(); ++to_be_substitute_it)
+        {
+            if(ExtractTools::haveSuchContent(line, to_be_substitute_it->first))
+            {
+                /// 替换
+                line = to_be_substitute_it->second;
+                modified = true;
+                break;
+            }
+        }
+        fileContent += line + "\n";
+    }
+
+    inFile.close();
+
+    /// 如果文件内容被修改，重新写入文件
+    if (modified)
+    {
+        std::ofstream outFile(filePath);
+        if (!outFile.is_open())
+        {
+            std::cerr << "无法写入文件: " << filePath << std::endl;
+            return;
+        }
+        outFile << fileContent;
+        outFile.close();
+        std::cout << "修改了文件: " << filePath << std::endl;
+    }
+}
+
 int main(int argc, const char **argv)
 {
     if(argc < 3)
@@ -386,6 +435,7 @@ int main(int argc, const char **argv)
             {
                 allFiles.push_back(entry.path().string());
                 std::cout << "添加文件：" << entry.path().string() << std::endl;
+                PreProcessFile(entry.path());
             }
         }
         std::cout << std::endl;
