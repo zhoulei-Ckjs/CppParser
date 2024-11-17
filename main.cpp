@@ -115,8 +115,6 @@ public:
                 {
                     if (const auto *field = llvm::dyn_cast<FieldDecl>(decl))
                     {
-                        std::cout << "----------增加成员变量: " << field->getNameAsString() << std::endl;
-
                         /// 获取并打印成员变量的注释
                         std::string comment_field_text;
                         if (const RawComment *field_raw_comment = _context->getRawCommentForDeclNoCache(field))
@@ -128,6 +126,7 @@ public:
                         auto current_field = current_class->second._field_list.find(field->getNameAsString());
                         if(current_field == current_class->second._field_list.end())
                         {
+                            std::cout << "----------增加成员变量: " << field->getNameAsString() << std::endl;
                             current_class->second._field_list.insert(std::make_pair(field->getNameAsString(),
                                                                                     CPPPARSER::_field(Declaration->getNameAsString(),
                                                                                                       field->getType().getAsString(),
@@ -139,7 +138,6 @@ public:
                     {
                         if (var->isStaticDataMember())
                         {
-                            std::cout << "----------增加静态成员变量: " << var->getNameAsString() << std::endl;
                             /// 获取并打印成员变量的注释
                             std::string comment_var_text;
                             if (const RawComment *var_raw_comment = _context->getRawCommentForDeclNoCache(var))
@@ -151,6 +149,7 @@ public:
                             auto current_field = current_class->second._field_list.find(var->getNameAsString());
                             if(current_field == current_class->second._field_list.end())
                             {
+                                std::cout << "----------增加静态成员变量: " << var->getNameAsString() << std::endl;
                                 current_class->second._field_list.insert(std::make_pair(var->getNameAsString(),
                                                                                         CPPPARSER::_field(Declaration->getNameAsString(),
                                                                                                           var->getType().getAsString(),
@@ -190,7 +189,6 @@ public:
                 {
                     current_class->second._has_method = true;
                     CXXMethodDecl *method = *it;
-                    std::cout << "----------增加成员函数: " << method->getNameAsString() << std::endl;
 
                     /// 获取方法的注释
                     std::string current_func_comment;
@@ -206,6 +204,7 @@ public:
                     auto current_func = current_class->second._method_list.find(method->getNameAsString());
                     if(current_func == current_class->second._method_list.end())
                     {
+                        std::cout << "----------增加成员函数: " << method->getNameAsString() << std::endl;
                         auto it_func = current_class->second._method_list.insert(std::make_pair(method->getNameAsString(),
                                                                                                 CPPPARSER::_method(Declaration->getNameAsString(), method->getAccess(),
                                                                                                                    method->getNameAsString(), current_return,
@@ -236,13 +235,15 @@ public:
                     }
 
                     /// 9.提取参数 map
-                    current_func->second._param_comment_map = ExtractTools::ExtractParamsContent(current_func_comment);
-                    for(auto& iter : current_func->second._param_comment_map)
+                    if(current_func->second._param_comment_map.empty())
                     {
-                        std::cout << "------------增加参数类型: " << std::endl;
-                        std::cout << "-------------- " << iter.first << " : " << iter.second << std::endl;
+                        current_func->second._param_comment_map = ExtractTools::ExtractParamsContent(current_func_comment);
+                        for(auto& iter : current_func->second._param_comment_map)
+                        {
+                            std::cout << "------------增加参数类型: " << std::endl;
+                            std::cout << "-------------- " << iter.first << " : " << iter.second << std::endl;
+                        }
                     }
-//                    current_func->second._param_comment_map
                 }
             }
             else
