@@ -7,6 +7,8 @@
 #include    <string>
 #include<sys/time.h>
 
+#include "UnknownClass.h"
+
 using namespace std;
 
 class Widget;
@@ -88,6 +90,12 @@ private :
      * @name timeval测试
      */
     timeval test_timeval;
+
+    /**
+     * @brief 未知类型
+     * @name 类型未知
+     */
+    UnknownClass unknown_class;
 };
 
 #endif //FUNCTIONPARSER_CLIENT_H
