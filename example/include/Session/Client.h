@@ -99,6 +99,11 @@ private :
      * @name 类型未知
      */
     UnknownClass unknown_class;
+    struct UnknownClassA unknown_classA;
+    UnknownClassB<int, float> unkonwn_classB;
+    UnknownClassC<UnknownClassD, int> unknown_classC;
+    UnknownClassE<int>::UnknownClassF unknown_classE;
+    UnknownCLassG<UnknownClassH, float>::UnknownClassI unknown_classG;
 };
 
 #endif //FUNCTIONPARSER_CLIENT_H
