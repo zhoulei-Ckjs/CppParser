@@ -441,7 +441,25 @@ public:
             /// 检查是否是 "unknown type name" 错误
             if (StringRef(DiagMessage).starts_with("unknown type name"))
             {
+                std::string unknown_class_name = ExtractTools::extractUnknownType(DiagMessage.c_str(), R"(unknown type name '([^']+)')");
+                std::string key = R"(\s*)" + unknown_class_name + R"(\s*)";
+                std::string value = "#ifndef __" + unknown_class_name + "__\n" +
+                                    "#define __" + unknown_class_name + "__\n" +
+                                    "class " + unknown_class_name + "{};\n" +
+                                    "#endif";
+                unknown_classes.insert(std::make_pair(key, value));
 
+            }
+            else if(StringRef(DiagMessage).starts_with("no template named"))
+            {
+                std::string unknown_class_name = ExtractTools::extractUnknownType(DiagMessage.c_str(), R"(no template named '([^']+)')");
+                std::string key = R"(\s*)" + unknown_class_name + R"(\s*)";
+                std::string value = "#ifndef __" + unknown_class_name + "__\n" +
+                                    "#define __" + unknown_class_name + "__\n" +
+                                    "template<typename... Args>\n" +
+                                    "class " + unknown_class_name + "{};\n" +
+                                    "#endif";
+                unknown_classes.insert(std::make_pair(key, value));
             }
             std::cout << "捕获到 unknown type name 错误: " << DiagMessage.c_str() << std::endl;
         }
