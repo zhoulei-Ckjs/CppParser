@@ -446,7 +446,7 @@ public:
                 std::string value = "#ifndef __" + unknown_class_name + "__\n" +
                                     "#define __" + unknown_class_name + "__\n" +
                                     "class " + unknown_class_name + "{};\n" +
-                                    "#endif";
+                                    "#endif\n";
                 unknown_classes.insert(std::make_pair(key, value));
 
             }
@@ -458,10 +458,10 @@ public:
                                     "#define __" + unknown_class_name + "__\n" +
                                     "template<typename... Args>\n" +
                                     "class " + unknown_class_name + "{};\n" +
-                                    "#endif";
+                                    "#endif\n";
                 unknown_classes.insert(std::make_pair(key, value));
             }
-            std::cout << "捕获到 unknown type name 错误: " << DiagMessage.c_str() << std::endl;
+            std::cout << DiagMessage.c_str() << std::endl;
         }
 
         /// 调用基类方法，以便其他诊断信息仍然能够正常处理
@@ -536,9 +536,9 @@ void PreProcessUnknownClassFile(std::string filePath)
             ParsingPreContent = false;
         }
         if(ParsingPreContent)
-            fileContentPre += line;
+            fileContentPre += line + "\n";
         else
-            fileContentPost += line;
+            fileContentPost += line + "\n";
     }
 
     inFile.close();
@@ -615,6 +615,7 @@ int main(int argc, const char **argv)
         PreProcessAllFile(allFiles);
         unknown_classes.clear();
         GetAllUnknownClass(OptionsParser, allFiles);
+        std::cout << "-----------------------未知类型个数[" << unknown_classes.size() << "]-----------------------" << std::endl;
     }while(unknown_classes.size() != 0);
 
     std::cout << unknown_classes.size() << std::endl;
