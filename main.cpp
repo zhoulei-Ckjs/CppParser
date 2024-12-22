@@ -461,6 +461,23 @@ public:
                                     "#endif\n";
                 unknown_classes.insert(std::make_pair(key, value));
             }
+            else if(StringRef(DiagMessage).starts_with("no type named") &&
+                    StringRef(DiagMessage).contains(" in "))
+            {
+                std::string unknown_class_name = ExtractTools::extractUnknownType(DiagMessage.c_str(), R"(no type named '([^']+)')");
+                std::string known_template = ExtractTools::extractUnknownType(DiagMessage.c_str(), R"( in '([^']+)')");
+                std::string key = R"(\s*)" + unknown_class_name + R"(\s*)";
+                std::string value = "\n#ifndef __" + unknown_class_name + "__\n" +
+                                    "#define __" + unknown_class_name + "__\n" +
+                                    "template<>\n" +
+                                    "class " + known_template + "\n" +
+                                    "{\n" +
+                                    "public:\n" +
+                                    "\tclass " + unknown_class_name + "{};\n" +
+                                    "};\n" +
+                                    "#endif\n";
+                unknown_classes.insert(std::make_pair(key, value));
+            }
             std::cout << DiagMessage.c_str() << std::endl;
         }
 
@@ -610,13 +627,14 @@ int main(int argc, const char **argv)
         std::cout << std::endl;
     }
 
+    int i = 1;
     do
     {
         PreProcessAllFile(allFiles);
         unknown_classes.clear();
         GetAllUnknownClass(OptionsParser, allFiles);
-        std::cout << "-----------------------未知类型个数[" << unknown_classes.size() << "]-----------------------" << std::endl;
-    }while(unknown_classes.size() != 0);
+        std::cout << "-----------------------迭代次数[" << i << "], 未知类型个数[" << unknown_classes.size() << "]-----------------------" << std::endl;
+    }while(unknown_classes.size() != 0 && i <= 10);
 
     std::cout << unknown_classes.size() << std::endl;
 

@@ -45,6 +45,12 @@ public :
      * @return 返回timeval
      */
     timeval& testTimeval(const timeval& t);
+    /**
+     * @brief 测试UnknownFunc
+     * @return UnknownCLassJ<UnknownClassK, float>::UnknownClassL& 引用
+     * @param UnknownCLassM<UnknownClassN, float>::UnknownClassO 测试类型
+     */
+    UnknownCLassJ<UnknownClassK, float>::UnknownClassL& UnknownFunc(UnknownCLassM<UnknownClassN, float>::UnknownClassO);
 private :
     /**
      * @brief 客户端套接子
