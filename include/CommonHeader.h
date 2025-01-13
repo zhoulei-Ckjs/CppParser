@@ -3,7 +3,9 @@
 
 #include <map>
 
+std::map<std::string, std::string> unknown_template;
 std::map<std::string, std::string> unknown_classes;
+
 std::map<std::string, std::string> g_header_substitute =
         {
                 {R"(\s*#include\s*<list>)", R"(

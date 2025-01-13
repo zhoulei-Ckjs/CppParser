@@ -448,7 +448,6 @@ public:
                                     "class " + unknown_class_name + "{};\n" +
                                     "#endif\n";
                 unknown_classes.insert(std::make_pair(key, value));
-
             }
             else if(StringRef(DiagMessage).starts_with("no template named"))
             {
@@ -459,7 +458,7 @@ public:
                                     "template<typename... Args>\n" +
                                     "class " + unknown_class_name + "{};\n" +
                                     "#endif\n";
-                unknown_classes.insert(std::make_pair(key, value));
+                unknown_template.insert(std::make_pair(key, value));
             }
             else if(StringRef(DiagMessage).starts_with("no type named") &&
                     StringRef(DiagMessage).contains(" in "))
@@ -478,6 +477,19 @@ public:
                                     "#endif\n";
                 unknown_classes.insert(std::make_pair(key, value));
             }
+            else if(StringRef(DiagMessage).starts_with("use of undeclared identifier"))
+            {
+                std::string unknown_class_name = ExtractTools::extractUnknownType(DiagMessage.c_str(), R"(use of undeclared identifier '([^']+)')");
+                std::string key = R"(\s*)" + unknown_class_name + R"(\s*)";
+                std::string value = "\n#ifndef __" + unknown_class_name + "__\n" +
+                                    "#define __" + unknown_class_name + "__\n" +
+                                    "class " + unknown_class_name + "\n" +
+                                    "{\n" +
+                                    "};\n" +
+                                    "#endif\n";
+                unknown_classes.insert(std::make_pair(key, value));
+            }
+
             std::cout << DiagMessage.c_str() << std::endl;
         }
 
@@ -537,14 +549,30 @@ void PreProcessUnknownClassFile(std::string filePath)
     /// 逐行读取文件内容
     while (std::getline(inFile, line))
     {
-        auto to_be_substitute_it = unknown_classes.begin();
-        for(; to_be_substitute_it != unknown_classes.end(); ++to_be_substitute_it)
+        if(unknown_template.size() != 0)
         {
-            if(ExtractTools::haveSuchContent(line, to_be_substitute_it->first))
+            auto to_be_substitute_it = unknown_template.begin();
+            for(; to_be_substitute_it != unknown_template.end(); ++to_be_substitute_it)
             {
-                /// 替换
-                toInsert += to_be_substitute_it->second;
-                modified = true;
+                if(ExtractTools::haveSuchContent(line, to_be_substitute_it->first))
+                {
+                    /// 替换
+                    toInsert += to_be_substitute_it->second;
+                    modified = true;
+                }
+            }
+        }
+        else
+        {
+            auto to_be_substitute_it = unknown_classes.begin();
+            for(; to_be_substitute_it != unknown_classes.end(); ++to_be_substitute_it)
+            {
+                if(ExtractTools::haveSuchContent(line, to_be_substitute_it->first))
+                {
+                    /// 替换
+                    toInsert += to_be_substitute_it->second;
+                    modified = true;
+                }
             }
         }
 
@@ -632,9 +660,10 @@ int main(int argc, const char **argv)
     {
         PreProcessAllFile(allFiles);
         unknown_classes.clear();
+        unknown_template.clear();
         GetAllUnknownClass(OptionsParser, allFiles);
         std::cout << "-----------------------迭代次数[" << i << "], 未知类型个数[" << unknown_classes.size() << "]-----------------------" << std::endl;
-    }while(unknown_classes.size() != 0 && i <= 10);
+    }while(unknown_classes.size() != 0 && i++ <= 10);
 
     std::cout << unknown_classes.size() << std::endl;
 
