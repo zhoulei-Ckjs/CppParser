@@ -2,6 +2,7 @@
 #define CPPPARSER_EXTRACTTOOLS_H
 
 #include <string>
+#include <map>
 
 class ExtractTools
 {

@@ -14,7 +14,20 @@ find_package(Clang REQUIRED CONFIG)
 message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
 message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -frtti -fexceptions")
+IF (CMAKE_SYSTEM_NAME MATCHES "Linux")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -frtti -fexceptions")
+    # 参数解析
+    # -frtti 启动 RTTI
+    # -fexceptions 启动 exception
+ELSEIF (CMAKE_SYSTEM_NAME MATCHES "Windows")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /GR /EHsc /bigobj")
+    # 参数解析
+    # /GR 启动 RTTI
+    # /EHsc 启动 exception
+    # /bigobj 大对象
+ELSE ()
+    MESSAGE(STATUS "other platform: ${CMAKE_SYSTEM_NAME}")
+ENDIF ()
 
 include_directories(
         ${LLVM_INCLUDE_DIRS}
