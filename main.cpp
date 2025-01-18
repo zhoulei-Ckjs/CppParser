@@ -347,15 +347,7 @@ int WriteCompileCommand(const char* argv)
         return CPPPARSER::ErrorCode::NotDirectory;
     }
 
-    auto j = R"(
-      [
-        {
-          "directory": ".",
-          "file": "/a.cpp",
-          "output": "/a.o"
-        }
-      ]
-    )"_json;
+    json j;
     std::string command = " -I" + absolute(my_path).string();
     for(const auto& entry : std::filesystem::recursive_directory_iterator(absolute(my_path)))
     {
@@ -364,7 +356,19 @@ int WriteCompileCommand(const char* argv)
     }
 
     command = "/usr/bin/g++" + command + " -frtti -fexceptions -g -std=gnu++17 -fdiagnostics-color=always   -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS";
-    j[0]["command"] = command.c_str();
+
+    int i = 0;
+    for(const auto& entry : std::filesystem::recursive_directory_iterator(absolute(my_path)))
+    {
+        if(entry.is_regular_file() && entry.path().has_extension() && entry.path().extension().string() == ".h")
+        {
+            j[i]["directory"] = ".";
+            j[i]["file"] = entry.path().string();
+            j[i]["output"] = "/a.o";
+            j[i]["command"] = command + " " + entry.path().string();
+            i++;
+        }
+    }
 
     std::ofstream outFile("compile_commands.json");
     outFile << j.dump(4);
