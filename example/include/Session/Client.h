@@ -17,10 +17,10 @@ using namespace std;
 class Widget;
 
 /**
- * @brief 客户端类
+ * @brief 客户端类，存储每个连接的客户端的元数据
  * @system 解析服务
  * @module 会话模块
- * @sub_module
+ * @sub_module 客户端模块
  * @name 客户端类
  */
 class Client
@@ -30,9 +30,12 @@ public :
      * @brief 发送数据包到客户端
      * @param buf 数据包
      * @param size 数据包长度
+     * @return 成功或失败
+     * @retval true 成功
+     * @retval false 失败
      * @name 发送数据
      */
-    void Send(char* buf, int size);
+    bool Send(char* buf, int size);
     /**
      * @brief 测试string
      * @param test_string 测试字符串
