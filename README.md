@@ -6,7 +6,7 @@ llvm版本：llvmorg-18.1.8
 
 克隆
 ```shell
-git clone --recurse-sudmodules --branch llvmorg-18.1.8 --depth 1 git@github.com:llvm/llvm-project.git
+git clone --recurse-submodules --branch llvmorg-18.1.8 --depth 1 git@github.com:llvm/llvm-project.git
 ```
 
 编译Linux
@@ -25,6 +25,12 @@ cmake --install build
 ```shell
 cmake -G Ninja -S llvm -B build -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra" -DCMAKE_BUILD_TYPE=Release -DLLVM_INSTALL_UTILS=ON -DLLVM_ENABLE_RTTI=ON -DLLVM_ENABLE_EH=ON -DCMAKE_CXX_FLAGS="/utf-8" -DLLVM_BUILD_LLVM_DYLIB=OFF -DLLVM_LINK_LLVM_DYLIB=OFF -DBUILD_SHARED_LIBS=OFF -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded -DLLVM_TARGETS_TO_BUILD="X86" -DCMAKE_INSTALL_PREFIX=../slib
 ninja -C build install
+```
+注：如果CMake编译出现“RegularExpression::compile(): Nested *?+.”
+
+则修改“llvm-project\llvm\cmake\modules\AddLLVM.cmake”第373行：
+```cmake
+source_group("Resource Files" FILES ${resource_file})
 ```
 
 # CppParser编译运行
